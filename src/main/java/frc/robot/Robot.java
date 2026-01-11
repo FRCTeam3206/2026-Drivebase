@@ -49,8 +49,7 @@ public class Robot extends TimedRobot {
   @NotLogged private Alliance prevAlliance = null;
 
   // Driver controller
-  private CommandXboxController driverController =
-      new CommandXboxController(OIConstants.kDriverControllerPort);
+  private CommandXboxController driverController =       new CommandXboxController(OIConstants.kDriverControllerPort);
 
   public Robot() {
     if (isSimulation()) {
