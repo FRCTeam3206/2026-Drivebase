@@ -43,7 +43,7 @@ public final class Configs {
           .positionConversionFactor(turningFactor) // radians
           .velocityConversionFactor(turningFactor / 60.0) // radians per second
           // This applies to REV Through Bore Encoder V2 (use REV_ThroughBoreEncoder for V1):
-          .apply(AbsoluteEncoderConfig.Presets.REV_ThroughBoreEncoderV2);
+          .apply(AbsoluteEncoderConfig.Presets.REV_ThroughBoreEncoder);
 
       turningConfig
           .closedLoop
