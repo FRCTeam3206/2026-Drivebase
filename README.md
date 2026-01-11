@@ -1,22 +1,16 @@
-# MAXSwerve Java Template v2026.0
+# Team 3206 2026 Drivebase
 
-See [the online changelog](https://github.com/REVrobotics/MAXSwerve-Java-Template/blob/main/CHANGELOG.md) for information about updates to the template that may have been released since you created your project.
+MAXSwerve drivebase code for Team 3206. The code is based on the [REVrobotics MAXSwerve Java Template v 2026.0](https://github.com/REVrobotics/MAXSwerve-Java-Template) modified with features that our team uses.
 
-## Description
+## Features
+### Added
+* Code from RobotContainer is moved to Robot to create a simpler code structure.
+* Logging is enabled via DataLog and Epilogue.
+* Spotless has been added for consitent code formatting.
+    * Run `./gradlew spotlessApply` at the top level of the code repository to format code.
+* GitHub CI Workflows have been added for verifying that the code builds and that it is properly formatted.
 
-A template project for an FRC swerve drivetrain that uses REV MAXSwerve Modules.
-
-Note that this template is designed for a drivetrain composed of four MAXSwerve Modules, each configured with two SPARKS MAX, a NEO as the driving motor, a NEO 550 as the turning motor, and a REV Through Bore Encoder as the absolute turning encoder. If you are using SPARK Flex for either the drive motor or turning motor, you will need to update the classes accordingly.
-
-To get started, make sure you have calibrated the zero offsets for the absolute encoders in Hardware Client 2 using the `Absolute Encoder` utility under the associated turning SPARK devices.
-
-## Prerequisites
-
-* SPARK MAX Firmware v26.1.0
-* REVLib v2026.0.0
-
-## Configuration
-
-It is possible that this project will not work for your robot right out of the box. Various things like the CAN IDs, PIDF gains, chassis configuration, etc. must be determined for your own robot!
-
-These values can be adjusted in the `Configs.java` and `Constants.java` files.
+### In process
+* Use NavX 2 as the gyro.
+* Include basic simulation support for the drivetrain.
+* Include PhotonVision.
