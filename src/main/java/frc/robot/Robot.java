@@ -4,9 +4,28 @@
 
 package frc.robot;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.epilogue.Epilogue;
+import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.epilogue.NotLogged;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.Constants.OIConstants;
+import frc.robot.subsystems.DriveSubsystem;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -14,10 +33,37 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  * the package after creating this project, you must also update the build.gradle file in the
  * project.
  */
+@Logged
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
-  private RobotContainer m_robotContainer;
+  // The robot's subsystems
+  private final DriveSubsystem robotDrive = new DriveSubsystem();
+
+  // fields that adjust the response for manual driving
+  private boolean fieldRelative = true;
+  private boolean invertControls = true;
+  private double speedMultiplier = 0.5; // factor applied to joystick drive commands
+
+  // track alliance reported by driverstaion
+  @NotLogged private Alliance prevAlliance = null;
+
+  // Driver controller
+  private CommandXboxController driverController =
+      new CommandXboxController(OIConstants.kDriverControllerPort);
+
+  public Robot() {
+    if (isSimulation()) {
+      DriverStation.silenceJoystickConnectionWarning(true);
+    }
+
+    DataLogManager.start();
+
+    // This will log the joysticks & control data from the Driver Station
+    DriverStation.startDataLog(DataLogManager.getLog());
+
+    Epilogue.bind(this);
+  }
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -27,7 +73,83 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    m_robotContainer = new RobotContainer();
+    configureButtonBindings();
+    configureDefaultCommands();
+  }
+
+  /**
+   * Use this method to define your button->command mappings. Buttons can be created by
+   * instantiating a {@link edu.wpi.first.wpilibj.GenericHID} or one of its subclasses ({@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then calling passing it to a
+   * {@link JoystickButton}.
+   */
+  private void configureButtonBindings() {
+    driverController.x().whileTrue(robotDrive.setXCommand());
+    driverController.back().onTrue(new InstantCommand(() -> fieldRelative = !fieldRelative));
+    driverController
+        .a()
+        .onTrue(robotDrive.runOnce(() -> robotDrive.zeroHeading(robotDrive.getPose())));
+    driverController.start().onTrue(new InstantCommand(() -> resetRobotToFieldCenter()));
+  }
+
+  /** Use this method to define default commands for subsystems. */
+  private void configureDefaultCommands() {
+    robotDrive.setDefaultCommand(
+        robotDrive.driveCommand(
+            adjustJoystick(
+                driverController::getLeftY,
+                () -> speedMultiplier,
+                () -> invertControls || !fieldRelative),
+            adjustJoystick(
+                driverController::getLeftX,
+                () -> speedMultiplier,
+                () -> invertControls || !fieldRelative),
+            adjustJoystick(driverController::getRightX, () -> speedMultiplier, () -> true),
+            () -> fieldRelative));
+  }
+
+  /**
+   * Use this to select the autonomous command.
+   *
+   * @return the command to run in autonomous
+   */
+  private Command getAutonomousCommand() {
+    return new InstantCommand();
+  }
+
+  /**
+   * Apply desired adjustments to a joystick input, such as deadbanding and nonlinear transforms.
+   *
+   * @param input The input value from the joystick
+   * @param negate Whether to invert the input
+   * @return The adjusted value from the joystick
+   */
+  private DoubleSupplier adjustJoystick(
+      DoubleSupplier input, DoubleSupplier multiplier, BooleanSupplier negate) {
+    return () -> {
+      double value = input.getAsDouble();
+      if (negate.getAsBoolean()) {
+        value = -value;
+      }
+      value = MathUtil.applyDeadband(value, OIConstants.kDriveDeadband);
+      value = multiplier.getAsDouble() * value;
+      return value;
+    };
+  }
+
+  public void resetRobotToFieldCenter() {
+    var field = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+    var heading =
+        (DriverStation.getAlliance().isPresent()
+                && DriverStation.getAlliance().get() == Alliance.Red)
+            ? 180.0
+            : 0.0;
+    robotDrive.zeroHeading();
+    robotDrive.resetOdometry(
+        new Pose2d(
+            field.getFieldLength() / 2,
+            field.getFieldWidth() / 2,
+            Rotation2d.fromDegrees(heading)));
   }
 
   /**
@@ -56,7 +178,7 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    m_autonomousCommand = getAutonomousCommand();
 
     /*
      * String autoSelected = SmartDashboard.getString("Auto Selector",
@@ -83,6 +205,14 @@ public class Robot extends TimedRobot {
     // this line or comment it out.
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
+    }
+    if (!DriverStation.getAlliance().isEmpty()) {
+      var alliance = DriverStation.getAlliance().get();
+      invertControls = alliance.equals(Alliance.Blue);
+      if (prevAlliance == null || !prevAlliance.equals(alliance)) {
+        resetRobotToFieldCenter();
+        prevAlliance = alliance;
+      }
     }
   }
 
