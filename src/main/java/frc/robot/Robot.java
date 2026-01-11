@@ -48,10 +48,9 @@ public class Robot extends TimedRobot {
   // track alliance reported by driverstaion
   @NotLogged private Alliance prevAlliance = null;
 
-  this is an error
-  
   // Driver controller
-  private CommandXboxController driverController =       new CommandXboxController(OIConstants.kDriverControllerPort);
+  private CommandXboxController driverController =
+      new CommandXboxController(OIConstants.kDriverControllerPort);
 
   public Robot() {
     if (isSimulation()) {
