@@ -1,7 +1,8 @@
 plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2026.1.1"
-    id 'com.diffplug.spotless' version '6.24.0'
+    id "com.diffplug.spotless" version "6.24.0"
+    id "com.peterabeles.gversion" version "1.10"
 }
 
 java {
@@ -152,5 +153,15 @@ spotless {
         trimTrailingWhitespace()
         indentWithSpaces(2)
         endWithNewline()
+    }
+
+    project.compileJava.dependsOn(createVersionFile)
+    gversion {
+        srcDir       = "src/main/java/"
+        classPackage = "frc.robot"
+        className    = "BuildConstants"
+        dateFormat   = "yyyy-MM-dd HH:mm:ss z"
+        timeZone     = "America/New_York" // Use preferred time zone
+        indent       = "  "
     }
 }
