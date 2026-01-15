@@ -87,6 +87,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   public void close() {
     m_gyro.close();
   }
+
   /**
    * Returns the currently-estimated pose of the robot.
    *
