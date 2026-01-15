@@ -33,3 +33,4 @@ jobs:
         name: Gradle reformat
       - run: ./gradlew test
         name: JUnit tests
+      - run: cat ${{github.workspace}}/build/reports/tests/test/index.html
