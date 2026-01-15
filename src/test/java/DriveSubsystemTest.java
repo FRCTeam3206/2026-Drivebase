@@ -1,5 +1,4 @@
 import frc.robot.subsystems.DriveSubsystem;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -31,5 +30,5 @@ public class DriveSubsystemTest {
                 Assertions.assertTrue(driveSubsystem.getPose().getY() > initialY);
             });
      */
-    }
+  }
 }
