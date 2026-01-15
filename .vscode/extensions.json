@@ -1,0 +1,7 @@
+{
+    "recommendations": [
+        "redhat.java",
+        "github.vscode-github-actions",
+        "vscjava.vscode-gradle"
+    ]
+}
