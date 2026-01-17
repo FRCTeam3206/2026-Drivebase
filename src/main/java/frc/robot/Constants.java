@@ -4,8 +4,10 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 
@@ -35,6 +37,14 @@ public final class Constants {
             new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
             new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
             new Translation2d(-kWheelBase / 2, -kTrackWidth / 2));
+
+    public static final SwerveModuleState[] kStatesX =
+        new SwerveModuleState[] {
+          new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
+          new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
+          new SwerveModuleState(0, Rotation2d.fromDegrees(-45)),
+          new SwerveModuleState(0, Rotation2d.fromDegrees(45))
+        };
 
     // Angular offsets of the modules relative to the chassis in radians
     public static final double kFrontLeftChassisAngularOffset = -Math.PI / 2;

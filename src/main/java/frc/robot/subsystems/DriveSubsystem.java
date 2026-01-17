@@ -9,13 +9,14 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
+import edu.wpi.first.hal.SimDouble;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.simulation.SimDeviceSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
@@ -52,6 +53,9 @@ public class DriveSubsystem extends SubsystemBase {
   // The gyro sensor
   private final AHRS m_gyro = new AHRS(AHRS.NavXComType.kMXP_SPI);
 
+  private final SimDeviceSim m_gyroSim = new SimDeviceSim("navX-Sensor", m_gyro.getPort());
+  private final SimDouble m_gyroSimAngle = m_gyroSim.getDouble("Yaw");
+
   // Odometry class for tracking robot pose
   SwerveDriveOdometry m_odometry =
       new SwerveDriveOdometry(
@@ -63,6 +67,13 @@ public class DriveSubsystem extends SubsystemBase {
             m_rearLeft.getPosition(),
             m_rearRight.getPosition()
           });
+
+  private SwerveModuleState[] m_statesRequested =
+      DriveConstants.kDriveKinematics.toSwerveModuleStates(new ChassisSpeeds());
+  private SwerveModuleState[] m_statesMeasured = m_statesRequested;
+  private ChassisSpeeds m_speedsRequested =
+      DriveConstants.kDriveKinematics.toChassisSpeeds(m_statesRequested);
+  private ChassisSpeeds m_speedsMeasured = m_speedsRequested;
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
@@ -85,6 +96,27 @@ public class DriveSubsystem extends SubsystemBase {
           m_rearLeft.getPosition(),
           m_rearRight.getPosition()
         });
+
+    m_statesMeasured =
+        new SwerveModuleState[] {
+          m_frontLeft.getState(),
+          m_frontRight.getState(),
+          m_rearLeft.getState(),
+          m_rearRight.getState()
+        };
+    m_speedsMeasured = DriveConstants.kDriveKinematics.toChassisSpeeds(m_statesMeasured);
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    double timestep = 20e-3;
+    m_frontLeft.simulationPeriodic(timestep);
+    m_frontRight.simulationPeriodic(timestep);
+    m_rearLeft.simulationPeriodic(timestep);
+    m_rearRight.simulationPeriodic(timestep);
+
+    double dTheta = (m_speedsRequested.omegaRadiansPerSecond * timestep) * 180 / Math.PI;
+    m_gyroSimAngle.set(m_gyroSimAngle.get() - dTheta);
   }
 
   /**
@@ -133,20 +165,12 @@ public class DriveSubsystem extends SubsystemBase {
                 ? ChassisSpeeds.fromFieldRelativeSpeeds(
                     xSpeedDelivered, ySpeedDelivered, rotDelivered, m_gyro.getRotation2d())
                 : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
-    SwerveDriveKinematics.desaturateWheelSpeeds(
-        swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
-    m_frontLeft.setDesiredState(swerveModuleStates[0]);
-    m_frontRight.setDesiredState(swerveModuleStates[1]);
-    m_rearLeft.setDesiredState(swerveModuleStates[2]);
-    m_rearRight.setDesiredState(swerveModuleStates[3]);
+    setModuleStates(swerveModuleStates);
   }
 
   /** Sets the wheels into an X formation to prevent movement. */
   public void setX() {
-    m_frontLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-    m_frontRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-    m_rearLeft.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-    m_rearRight.setDesiredState(new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+    setModuleStates(DriveConstants.kStatesX);
   }
 
   /**
@@ -161,6 +185,9 @@ public class DriveSubsystem extends SubsystemBase {
     m_frontRight.setDesiredState(desiredStates[1]);
     m_rearLeft.setDesiredState(desiredStates[2]);
     m_rearRight.setDesiredState(desiredStates[3]);
+
+    m_statesRequested = desiredStates;
+    m_speedsRequested = DriveConstants.kDriveKinematics.toChassisSpeeds(desiredStates);
   }
 
   /** Resets the drive encoders to currently read a position of 0. */
