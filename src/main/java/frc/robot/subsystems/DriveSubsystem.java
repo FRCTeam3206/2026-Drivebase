@@ -116,11 +116,7 @@ public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   }
 
   public void close() {
-    m_gyro.close();
-  }
-
-  public void close() {
-    m_gyro.close();
+    navx.close();
   }
 
   /**
