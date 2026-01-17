@@ -70,6 +70,10 @@ public class DriveSubsystem extends SubsystemBase {
     HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_MaxSwerve);
   }
 
+  public void SPININCIRC(int degrees) {
+    drive((0), (0), (degrees), false);
+  }
+
   @Override
   public void periodic() {
     // Update the odometry in the periodic block
