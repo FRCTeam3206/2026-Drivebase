@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.OIConstants;
+import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -39,6 +40,8 @@ public class Robot extends TimedRobot {
 
   // The robot's subsystems
   private final DriveSubsystem robotDrive = new DriveSubsystem();
+
+  private final ClimberSubsystem climber = new ClimberSubsystem(); 
 
   // fields that adjust the response for manual driving
   private boolean fieldRelative = true;
@@ -75,7 +78,6 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     configureButtonBindings();
     configureDefaultCommands();
-    robotDrive.SPININCIRC(90);
   }
 
   /**
@@ -91,6 +93,8 @@ public class Robot extends TimedRobot {
         .a()
         .onTrue(robotDrive.runOnce(() -> robotDrive.zeroHeading(robotDrive.getPose())));
     driverController.start().onTrue(new InstantCommand(() -> resetRobotToFieldCenter()));
+    driverController.povUp().whileTrue(climber.raiseCommand());
+    driverController.povDown().whileTrue(climber.lowerCommand());
   }
 
   /** Use this method to define default commands for subsystems. */

@@ -10,7 +10,7 @@ public final class Configs {
   public static final class MAXSwerveModule {
     public static final SparkMaxConfig drivingConfig = new SparkMaxConfig();
     public static final SparkMaxConfig turningConfig = new SparkMaxConfig();
-
+    
     static {
       // Use module constants to calculate conversion factors and feed forward gain.
       double drivingFactor =
@@ -57,6 +57,13 @@ public final class Configs {
           // longer route.
           .positionWrappingEnabled(true)
           .positionWrappingInputRange(0, turningFactor);
+    }
+  }
+  public static final class ClimberModule {
+    public static final SparkMaxConfig climberConfig = new SparkMaxConfig();
+
+    static {
+      climberConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(30);
     }
   }
 }
