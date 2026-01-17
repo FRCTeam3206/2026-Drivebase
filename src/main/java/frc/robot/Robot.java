@@ -41,7 +41,7 @@ public class Robot extends TimedRobot {
   // The robot's subsystems
   private final DriveSubsystem robotDrive = new DriveSubsystem();
 
-  private final ClimberSubsystem climber = new ClimberSubsystem(); 
+  private final ClimberSubsystem climber = new ClimberSubsystem();
 
   // fields that adjust the response for manual driving
   private boolean fieldRelative = true;
