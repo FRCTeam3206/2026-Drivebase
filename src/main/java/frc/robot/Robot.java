@@ -208,7 +208,7 @@ public class Robot extends TimedRobot {
     }
     if (!DriverStation.getAlliance().isEmpty()) {
       var alliance = DriverStation.getAlliance().get();
-      invertControls = alliance.equals(Alliance.Blue);
+      invertControls = isSimulation() || alliance.equals(Alliance.Blue);
       if (prevAlliance == null || !prevAlliance.equals(alliance)) {
         resetRobotToFieldCenter();
         prevAlliance = alliance;
