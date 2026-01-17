@@ -51,16 +51,16 @@ public class DriveSubsystem extends SubsystemBase {
           DriveConstants.kBackRightChassisAngularOffset);
 
   // The gyro sensor
-  private final AHRS m_gyro = new AHRS(AHRS.NavXComType.kMXP_SPI);
+  private final AHRS navx = new AHRS(AHRS.NavXComType.kMXP_SPI);
 
-  private final SimDeviceSim m_gyroSim = new SimDeviceSim("navX-Sensor", m_gyro.getPort());
-  private final SimDouble m_gyroSimAngle = m_gyroSim.getDouble("Yaw");
+  private final SimDeviceSim m_navxSim = new SimDeviceSim("navX-Sensor", navx.getPort());
+  private final SimDouble m_navxSimAngle = m_navxSim.getDouble("Yaw");
 
   // Odometry class for tracking robot pose
   SwerveDriveOdometry m_odometry =
       new SwerveDriveOdometry(
           DriveConstants.kDriveKinematics,
-          m_gyro.getRotation2d(),
+          navx.getRotation2d(),
           new SwerveModulePosition[] {
             m_frontLeft.getPosition(),
             m_frontRight.getPosition(),
@@ -85,7 +85,7 @@ public class DriveSubsystem extends SubsystemBase {
   public void periodic() {
     // Update the odometry in the periodic block
     m_odometry.update(
-        m_gyro.getRotation2d(),
+        navx.getRotation2d(),
         new SwerveModulePosition[] {
           m_frontLeft.getPosition(),
           m_frontRight.getPosition(),
@@ -112,7 +112,7 @@ public class DriveSubsystem extends SubsystemBase {
     m_rearRight.simulationPeriodic(timestep);
 
     double dTheta = (m_speedsRequested.omegaRadiansPerSecond * timestep) * 180 / Math.PI;
-    m_gyroSimAngle.set(m_gyroSimAngle.get() - dTheta);
+    m_navxSimAngle.set(m_navxSimAngle.get() - dTheta);
   }
 
   /**
@@ -131,7 +131,7 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void resetOdometry(Pose2d pose) {
     m_odometry.resetPosition(
-        m_gyro.getRotation2d(),
+        navx.getRotation2d(),
         new SwerveModulePosition[] {
           m_frontLeft.getPosition(),
           m_frontRight.getPosition(),
@@ -159,7 +159,7 @@ public class DriveSubsystem extends SubsystemBase {
         DriveConstants.kDriveKinematics.toSwerveModuleStates(
             fieldRelative
                 ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                    xSpeedDelivered, ySpeedDelivered, rotDelivered, m_gyro.getRotation2d())
+                    xSpeedDelivered, ySpeedDelivered, rotDelivered, navx.getRotation2d())
                 : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
     setModuleStates(swerveModuleStates);
   }
@@ -196,7 +196,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   /** Zeroes the heading of the robot. */
   public void zeroHeading() {
-    m_gyro.reset();
+    navx.reset();
   }
 
   /**
@@ -205,7 +205,7 @@ public class DriveSubsystem extends SubsystemBase {
    * @param pose The pose that the robot will have after reset.
    */
   public void zeroHeading(Pose2d pose) {
-    m_gyro.reset();
+    navx.reset();
     resetOdometry(pose);
   }
 
@@ -215,7 +215,7 @@ public class DriveSubsystem extends SubsystemBase {
    * @return the robot's heading in degrees, from -180 to 180
    */
   public double getHeading() {
-    return m_gyro.getRotation2d().getDegrees();
+    return navx.getRotation2d().getDegrees();
   }
 
   /**
@@ -224,7 +224,7 @@ public class DriveSubsystem extends SubsystemBase {
    * @return The turn rate of the robot, in degrees per second
    */
   public double getTurnRate() {
-    return m_gyro.getRate() * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
+    return navx.getRate() * (DriveConstants.kGyroReversed ? -1.0 : 1.0);
   }
 
   /**

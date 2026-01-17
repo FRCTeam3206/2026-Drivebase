@@ -66,6 +66,11 @@ public class Robot extends TimedRobot {
     DriverStation.startDataLog(DataLogManager.getLog());
 
     Epilogue.bind(this);
+
+    var backend = Epilogue.getConfig().backend;
+    backend.log("Robot/buildInfo/currentBranch", BuildConstants.GIT_BRANCH);
+    backend.log("Robot/buildInfo/buildDate", BuildConstants.BUILD_DATE);
+    backend.log("Robot/buildInfo/commitId", BuildConstants.GIT_SHA);
   }
 
   /**
@@ -213,7 +218,7 @@ public class Robot extends TimedRobot {
     }
     if (!DriverStation.getAlliance().isEmpty()) {
       var alliance = DriverStation.getAlliance().get();
-      invertControls = alliance.equals(Alliance.Blue);
+      invertControls = isSimulation() || alliance.equals(Alliance.Blue);
       if (prevAlliance == null || !prevAlliance.equals(alliance)) {
         resetRobotToFieldCenter();
         prevAlliance = alliance;
