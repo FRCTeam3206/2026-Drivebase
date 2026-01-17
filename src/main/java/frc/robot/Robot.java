@@ -75,8 +75,7 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     configureButtonBindings();
     configureDefaultCommands();
-    robotDrive.SPININCIRC(90
-    );
+    robotDrive.SPININCIRC(90);
   }
 
   /**
@@ -138,7 +137,7 @@ public class Robot extends TimedRobot {
       return value;
     };
   }
-  
+
   public void resetRobotToFieldCenter() {
     var field = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
     var heading =
