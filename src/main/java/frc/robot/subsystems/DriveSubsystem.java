@@ -70,8 +70,10 @@ public class DriveSubsystem extends SubsystemBase {
 
   private SwerveModuleState[] m_statesRequested =
       DriveConstants.kDriveKinematics.toSwerveModuleStates(new ChassisSpeeds());
+  private SwerveModuleState[] m_statesMeasured = m_statesRequested;
   private ChassisSpeeds m_speedsRequested =
       DriveConstants.kDriveKinematics.toChassisSpeeds(m_statesRequested);
+  private ChassisSpeeds m_speedsMeasured = m_speedsRequested;
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
@@ -90,6 +92,15 @@ public class DriveSubsystem extends SubsystemBase {
           m_rearLeft.getPosition(),
           m_rearRight.getPosition()
         });
+
+    m_statesMeasured =
+        new SwerveModuleState[] {
+          m_frontLeft.getState(),
+          m_frontRight.getState(),
+          m_rearLeft.getState(),
+          m_rearRight.getState()
+        };
+    m_speedsMeasured = DriveConstants.kDriveKinematics.toChassisSpeeds(m_statesMeasured);
   }
 
   @Override
@@ -102,16 +113,6 @@ public class DriveSubsystem extends SubsystemBase {
 
     double dTheta = (m_speedsRequested.omegaRadiansPerSecond * timestep) * 180 / Math.PI;
     m_gyroSimAngle.set(m_gyroSimAngle.get() - dTheta);
-  }
-
-  public SwerveModuleState[] getStatesMeasured() {
-    return new SwerveModuleState[] {
-      m_frontLeft.getState(), m_frontRight.getState(), m_rearLeft.getState(), m_rearRight.getState()
-    };
-  }
-
-  public ChassisSpeeds getSpeedsMeasured() {
-    return DriveConstants.kDriveKinematics.toChassisSpeeds(getStatesMeasured());
   }
 
   /**
