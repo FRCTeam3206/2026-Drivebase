@@ -111,5 +111,6 @@ public final class Constants {
 
   public static final class ClimberConstants {
     public static final int kClimberConstantCanId = 8;
+    public static final double climbMax = 3.7;
   }
 }

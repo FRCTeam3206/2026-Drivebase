@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -100,6 +101,7 @@ public class Robot extends TimedRobot {
     driverController.start().onTrue(new InstantCommand(() -> resetRobotToFieldCenter()));
     driverController.povUp().whileTrue(climber.raiseCommand());
     driverController.povDown().whileTrue(climber.lowerCommand());
+    SmartDashboard.putData("Reset Climber", climber.zero());
   }
 
   /** Use this method to define default commands for subsystems. */
