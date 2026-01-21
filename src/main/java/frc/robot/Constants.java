@@ -10,6 +10,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import frc.robot.pathing.robotprofile.Motor;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -107,5 +108,23 @@ public final class Constants {
 
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
+  }
+
+  public static final class PathingConstants {
+    // Tolerances
+    public static final double kTranslationTolerance = 0.01;
+    public static final double kRotationTolerance = Math.toRadians(1);
+    public static final double kVelocityTolerance = 0.04;
+    public static final double kRotVelocityTolerance = Math.toRadians(7);
+
+    // Safety multipliers
+    public static final double kVelocitySafety = 1;
+    public static final double kAccelSafety = 0.35;
+    public static final double kRotVelocitySafety = 1;
+    public static final double kRotAccelSafety = 1;
+    public static final double kRobotMassKg = 63.5;
+    public static final double kRobotLengthWidthMeters =
+        Units.inchesToMeters(36);
+    public static final Motor kDriveMotor = Motor.NEO().gear(4.71);
   }
 }

@@ -17,6 +17,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -26,6 +28,7 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.DriveSubsystem;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+import java.util.jar.Attributes.Name;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -36,6 +39,7 @@ import java.util.function.DoubleSupplier;
 @Logged
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
+  private SendableChooser<Command> m_autonChooser = new SendableChooser<Command>();
 
   // The robot's subsystems
   private final DriveSubsystem robotDrive = new DriveSubsystem();
@@ -114,7 +118,7 @@ public class Robot extends TimedRobot {
    * @return the command to run in autonomous
    */
   private Command getAutonomousCommand() {
-    return new InstantCommand();
+    return m_autonChooser.getSelected();
   }
 
   /**
@@ -166,6 +170,13 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
+  }
+
+  public void autons() {
+    m_autonChooser.addOption("example", robotDrive.getToGoal(new Pose2d(0, 0, Rotation2d.fromDegrees(0))));
+    m_autonChooser.setDefaultOption("practice", robotDrive.getToGoal(new Pose2d(15, 15, Rotation2d.fromDegrees(15))));
+
+    SmartDashboard.putData("Auton Chooser", m_autonChooser);
   }
 
   /** This function is called once each time the robot enters Disabled mode. */

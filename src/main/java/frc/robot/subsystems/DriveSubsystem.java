@@ -20,10 +20,16 @@ import edu.wpi.first.wpilibj.simulation.SimDeviceSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.ModuleConstants;
+import frc.robot.Constants.PathingConstants;
+import frc.robot.pathing.PathingCommand;
+import frc.robot.pathing.PathingCommandGenerator;
+import frc.robot.pathing.robotprofile.RobotProfile;
+
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
-@Logged
+@Logged  
 public class DriveSubsystem extends SubsystemBase {
   // Create MAXSwerveModules
   private final MAXSwerveModule m_frontLeft =
@@ -74,6 +80,27 @@ public class DriveSubsystem extends SubsystemBase {
   private ChassisSpeeds m_speedsRequested =
       DriveConstants.kDriveKinematics.toChassisSpeeds(m_statesRequested);
   private ChassisSpeeds m_speedsMeasured = m_speedsRequested;
+
+   RobotProfile m_robotProfile =
+      new RobotProfile(
+              PathingConstants.kRobotMassKg,
+              ModuleConstants.kWheelDiameterMeters,
+              PathingConstants.kRobotLengthWidthMeters,
+              PathingConstants.kRobotLengthWidthMeters,
+              PathingConstants.kDriveMotor)
+          .setSafteyMultipliers(
+              PathingConstants.kVelocitySafety,
+              PathingConstants.kAccelSafety,
+              PathingConstants.kRotVelocitySafety,
+              PathingConstants.kRotAccelSafety);
+  PathingCommandGenerator m_pathGen =
+      new PathingCommandGenerator(m_robotProfile, this::getPose, this::driveSpeed, this)
+          .withAllianceFlipping(false)
+          .withTolerances(
+              PathingConstants.kTranslationTolerance,
+              PathingConstants.kRotationTolerance,
+              PathingConstants.kVelocityTolerance,
+              PathingConstants.kRotVelocityTolerance);
 
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem() {
@@ -164,6 +191,14 @@ public class DriveSubsystem extends SubsystemBase {
     setModuleStates(swerveModuleStates);
   }
 
+  public void driveSpeed(ChassisSpeeds speeds) {
+    drive(
+        speeds.vxMetersPerSecond / DriveConstants.kMaxSpeedMetersPerSecond,
+        speeds.vyMetersPerSecond / DriveConstants.kMaxSpeedMetersPerSecond,
+        speeds.omegaRadiansPerSecond / DriveConstants.kMaxAngularSpeed,
+        true);
+  }
+
   /** Sets the wheels into an X formation to prevent movement. */
   public void setX() {
     setModuleStates(DriveConstants.kStatesX);
@@ -216,6 +251,10 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public double getHeading() {
     return navx.getRotation2d().getDegrees();
+  }
+
+  public PathingCommand getToGoal(Pose2d goal) {
+    return m_pathGen.generateToPoseCommand(goal);
   }
 
   /**
