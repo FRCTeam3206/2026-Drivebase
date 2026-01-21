@@ -73,39 +73,39 @@ public class TurretSubsystem extends SubsystemBase {
    * meaning they do not share any factors). To do this, we set up the following equations (where
    * g19 is the position of the 19-tooth gear from 0 to 18 and g21 is the position of the 21-tooth
    * gear from 0 to 20):
-   * 
+   *
    * <p>x ≡ g19 (mod 19)
-   * 
-   * <p> x ≡ g21 (mod 21)
-   * 
+   *
+   * <p>x ≡ g21 (mod 21)
+   *
    * <p>To find x (which will be the number of teeth on the large gear), we use the CRT as follows:
-   * 
+   *
    * <p>M = m1 * m2 = 19 * 21 = 399
    *
    * <p>r1 = g19
-   * 
-   * <p> r2 = g21
+   *
+   * <p>r2 = g21
    *
    * <p>M1 = M / m1 = m2 = 21
-   * 
+   *
    * <p>M2 = M / m2 = m1 = 19
    *
    * <p>x1 = 10 (see below)
-   * 
+   *
    * <p>M1 * x1 ≡ 1 (mod m1)
-   * 
+   *
    * <p>21 * x1 ≡ 1 (mod 19) ≡ 210 (mod 19)
-   * 
+   *
    * <p>x2 = 10 (see below)
-   * 
+   *
    * <p>M2 * x2 ≡ 1 (mod m2)
-   * 
+   *
    * <p>19 * x2 ≡ 1 (mod 21) ≡ 190 (mod 21)
    *
    * <p>Therefore, we can combine these to conclude that:
-   * 
+   *
    * <p>x = (r1 * M1 * x1 + r2 * M2 * x2) mod 399
-   * 
+   *
    * <p>x = (g19 * 21 * 10 + g21 * 19 * 10) mod 399
    *
    * <p>This is the resulting equation used below: x = (210 * g19 + 190 * g21) mod 399
