@@ -111,5 +111,6 @@ public final class Constants {
 
   public static final class TurretConstants {
     public static final int kTurretCANId = 41;
+    public static final int kTurretCANId2 = 42;
   }
 }

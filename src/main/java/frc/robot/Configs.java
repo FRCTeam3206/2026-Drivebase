@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.AbsoluteEncoderConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -57,6 +58,28 @@ public final class Configs {
           // longer route.
           .positionWrappingEnabled(true)
           .positionWrappingInputRange(0, turningFactor);
+    }
+  }
+
+  public static final class Turret {
+    public static final SparkMaxConfig turretMotorConfig19 = new SparkMaxConfig();
+    public static final SparkMaxConfig turretMotorConfig21 = new SparkMaxConfig();
+
+    static {
+      turretMotorConfig19.idleMode(IdleMode.kBrake).smartCurrentLimit(20);
+      turretMotorConfig21.idleMode(IdleMode.kBrake).smartCurrentLimit(20);
+
+      turretMotorConfig19
+          .absoluteEncoder
+          .inverted(false)
+          .positionConversionFactor(19.0)
+          .velocityConversionFactor(19.0 / 60.0);
+
+      turretMotorConfig21
+          .absoluteEncoder
+          .inverted(false)
+          .positionConversionFactor(21.0)
+          .velocityConversionFactor(21.0 / 60.0);
     }
   }
 }
