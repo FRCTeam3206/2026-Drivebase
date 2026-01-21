@@ -108,4 +108,10 @@ public final class Constants {
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
   }
+
+  /*Change Later. Launcher Motors */
+  public static final class ShooterConstants{
+    public static final int kTopLauncherMotor = 15;
+    public static final int kBottomLauncherMotor = 16;
+  }
 }
