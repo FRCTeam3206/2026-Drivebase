@@ -116,6 +116,9 @@ public final class Constants {
     public static final int kTurretCANId = 41;
     public static final int kTurretCANId2 = 42;
 
+    public static final int kLowerLimitPort = 0;
+    public static final int kUpperLimitPort = 1;
+
     public static final double kSTurret = 0.0;
     public static final double kVTurret = 0.0;
     public static final double kATurret = 0.0;

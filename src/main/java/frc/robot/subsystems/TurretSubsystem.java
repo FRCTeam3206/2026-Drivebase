@@ -11,6 +11,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
@@ -24,9 +25,12 @@ public class TurretSubsystem extends SubsystemBase {
   private final SparkMax m_turretMotor =
       new SparkMax(TurretConstants.kTurretCANId, MotorType.kBrushless);
   private final AbsoluteEncoder m_encoder19Teeth = m_turretMotor.getAbsoluteEncoder();
-  private final SparkMax m_turretMotor2 =
+  private final SparkMax m_turretEncoderOnly =
       new SparkMax(TurretConstants.kTurretCANId2, MotorType.kBrushless);
-  private final AbsoluteEncoder m_encoder21Teeth = m_turretMotor2.getAbsoluteEncoder();
+  private final AbsoluteEncoder m_encoder21Teeth = m_turretEncoderOnly.getAbsoluteEncoder();
+
+  private final DigitalInput m_lowerLimitSwitch = new DigitalInput(TurretConstants.kLowerLimitPort);
+  private final DigitalInput m_upperLimitSwitch = new DigitalInput(TurretConstants.kUpperLimitPort);
 
   private final SimpleMotorFeedforward feedforward =
       new SimpleMotorFeedforward(
@@ -60,7 +64,7 @@ public class TurretSubsystem extends SubsystemBase {
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
 
-    m_turretMotor2.configure(
+    m_turretEncoderOnly.configure(
         Configs.Turret.turretMotorConfig21,
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
@@ -74,10 +78,26 @@ public class TurretSubsystem extends SubsystemBase {
     return targetPose;
   }
 
-  public Command setVoltage(double volts) {
+  public boolean atLowerLimit() {
+    return m_lowerLimitSwitch.get();
+  }
+
+  public boolean atUpperLimit() {
+    return m_upperLimitSwitch.get();
+  }
+
+  public void setVoltage(double volts) {
+    if ((atLowerLimit() && volts < 0.0) || (atUpperLimit() && volts > 0.0)) {
+      m_turretMotor.setVoltage(0);
+    } else {
+      m_turretMotor.setVoltage(6 * volts);
+    }
+  }
+
+  public Command setVoltageCommand(double volts) {
     return run(
         () -> {
-          m_turretMotor.setVoltage(6 * volts);
+          m_turretMotor.setVoltage(volts);
         });
   }
 
@@ -96,7 +116,7 @@ public class TurretSubsystem extends SubsystemBase {
     fb = feedback.calculate(getPosRadians(), setpoint.position);
 
     double voltage = ff + fb;
-    m_turretMotor.setVoltage(voltage);
+    setVoltage(voltage);
   }
 
   public Command faceTargetCommand(Supplier<Pose2d> targetPoseSupplier) {
