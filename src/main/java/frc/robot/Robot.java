@@ -72,6 +72,8 @@ public class Robot extends TimedRobot {
     backend.log("Robot/buildInfo/commitId", BuildConstants.GIT_SHA);
   }
 
+private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -97,7 +99,7 @@ public class Robot extends TimedRobot {
         .a()
         .onTrue(robotDrive.runOnce(() -> robotDrive.zeroHeading(robotDrive.getPose())));
     driverController.start().onTrue(new InstantCommand(() -> resetRobotToFieldCenter()));
-    driverController.rightTrigger().whileTrue(FuelLauncher.launchCommand);  }
+    driverController.rightTrigger().whileTrue(shooterSubsystem.launchCommand());  }
 
   /** Use this method to define default commands for subsystems. */
   private void configureDefaultCommands() {
