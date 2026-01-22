@@ -67,14 +67,14 @@ public class TurretSubsystem extends SubsystemBase {
    * This adjusts the turret position such that pi is facing forward and 0/2 pi is not in the range
    * of motion.
    */
-  public double getPosRadians() {
-    return (getTeethPosRadiansAdjusted() + Math.PI) % (2 * Math.PI);
-  }
+//   public double getPosRadians() {
+//     return (getTeethPosRadiansAdjusted() + Math.PI) % (2 * Math.PI);
+//   }
 
   /**
    * This adjusts to the more precise number of radians that isn't based on whole numbers of teeth.
    */
-  private double getTeethPosRadiansAdjusted() {
+  private double getPosRadians() {
     double teeth19 = getEncoderTeeth19();
     double adjustment = (teeth19 - ((int) teeth19)) * (Math.PI / 100.0);
     return getTeethPosRadians() + adjustment;
@@ -82,7 +82,7 @@ public class TurretSubsystem extends SubsystemBase {
 
   /** Converts the number of teeth to radians */
   private double getTeethPosRadians() {
-    return get200TeethPos() * Math.PI / 100.0;
+    return getCRTResult() * Math.PI / 100.0;
   }
 
   /**
@@ -91,13 +91,13 @@ public class TurretSubsystem extends SubsystemBase {
    * forward in the center of its range of motion and that the turret has a range of motion smaller
    * than 360 degrees. This makes it the correct number of teeth.
    */
-  private int get200TeethPos() {
-    int result = getCRTInitResult();
-    if (result > 200) {
-      result = result - 199;
-    }
-    return result;
-  }
+//   private int get200TeethPos() {
+//     int result = getCRTInitResult();
+//     if (result > 200) {
+//       result = result - 199;
+//     }
+//     return result;
+//   }
 
   /**
    * We can use the Chinese Remainder Theorem (CRT) to find the position of the large gear given the
@@ -142,8 +142,12 @@ public class TurretSubsystem extends SubsystemBase {
    *
    * <p>This is the resulting equation used below: x = (210 * g19 + 190 * g21) mod 399
    */
-  private int getCRTInitResult() {
-    return (210 * ((int) getEncoderTeeth19()) + 190 * ((int) getEncoderTeeth21())) % 399;
+  private int getCRTResult() {
+    // Allows us to set 0 as forward and then makes this 180 degrees
+    int teeth19 = (((int) getEncoderTeeth19()) + 100) % 19;
+    int teeth21 = (((int) getEncoderTeeth21()) + 100) % 21;
+
+    return (210 * teeth19 + 190 * teeth21) % 399;
   }
 
   private double getEncoderTeeth19() {
