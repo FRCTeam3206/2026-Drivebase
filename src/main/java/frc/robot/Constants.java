@@ -114,10 +114,13 @@ public final class Constants {
 
   public static final class TurretConstants {
     public static final int kTurretCANId = 41;
-    public static final int kTurretCANId2 = 42;
 
-    public static final int kLowerLimitPort = 0;
-    public static final int kUpperLimitPort = 1;
+    public static final int kEncoderOnlyPort = 0;
+    public static final double kEncoderMaxValue = 21.0;
+    public static final double kEncoderZero = 0.0;
+
+    public static final int kLowerLimitPort = 1;
+    public static final int kUpperLimitPort = 2;
 
     public static final double kSTurret = 0.0;
     public static final double kVTurret = 0.0;

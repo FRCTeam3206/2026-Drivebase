@@ -12,22 +12,25 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.TurretConstants;
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 @Logged
 public class TurretSubsystem extends SubsystemBase {
   private final SparkMax m_turretMotor =
       new SparkMax(TurretConstants.kTurretCANId, MotorType.kBrushless);
-  private final AbsoluteEncoder m_encoder19Teeth = m_turretMotor.getAbsoluteEncoder();
-  private final SparkMax m_turretEncoderOnly =
-      new SparkMax(TurretConstants.kTurretCANId2, MotorType.kBrushless);
-  private final AbsoluteEncoder m_encoder21Teeth = m_turretEncoderOnly.getAbsoluteEncoder();
+  private final AbsoluteEncoder m_absEncoder19Teeth = m_turretMotor.getAbsoluteEncoder();
+
+  private final DutyCycleEncoder m_dutyCycleEncoder21Teeth =
+      new DutyCycleEncoder(TurretConstants.kEncoderOnlyPort, 0.0, TurretConstants.kEncoderZero);
+      // Unit conversion is taken care of elsewhere to ensure it doesn't interfere with setting zero.
 
   private final DigitalInput m_lowerLimitSwitch = new DigitalInput(TurretConstants.kLowerLimitPort);
   private final DigitalInput m_upperLimitSwitch = new DigitalInput(TurretConstants.kUpperLimitPort);
@@ -60,12 +63,7 @@ public class TurretSubsystem extends SubsystemBase {
     this.blueBoolSupplier = () -> robotPoseSupplier.get().getX() < FieldConstants.kFieldCenterX;
 
     m_turretMotor.configure(
-        Configs.Turret.turretMotorConfig19,
-        ResetMode.kResetSafeParameters,
-        PersistMode.kPersistParameters);
-
-    m_turretEncoderOnly.configure(
-        Configs.Turret.turretMotorConfig21,
+        Configs.Turret.turretMotorConfig,
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
   }
@@ -86,6 +84,10 @@ public class TurretSubsystem extends SubsystemBase {
     return m_upperLimitSwitch.get();
   }
 
+  /**
+   * This method should always be used for setting motor voltage, not directly with the motor. This ensures that it can't go over the limit.
+   * @param volts The volts to set to the turret motor
+   */
   public void setVoltage(double volts) {
     if ((atLowerLimit() && volts < 0.0) || (atUpperLimit() && volts > 0.0)) {
       m_turretMotor.setVoltage(0);
@@ -94,10 +96,10 @@ public class TurretSubsystem extends SubsystemBase {
     }
   }
 
-  public Command setVoltageCommand(double volts) {
+  public Command setVoltageCommand(DoubleSupplier voltsSupplier) {
     return run(
         () -> {
-          m_turretMotor.setVoltage(volts);
+          setVoltage(voltsSupplier.getAsDouble());
         });
   }
 
@@ -112,6 +114,7 @@ public class TurretSubsystem extends SubsystemBase {
         new TrapezoidProfile.State(
             robotToTargetRadians - robotPoseSupplier.get().getRotation().getRadians(), 0);
     this.setpoint = profile.calculate(0.020, this.setpoint, this.goal);
+
     ff = feedforward.calculateWithVelocities(cur_velocity, setpoint.velocity);
     fb = feedback.calculate(getPosRadians(), setpoint.position);
 
@@ -148,7 +151,7 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public double getVelocity() {
-    return m_encoder19Teeth.getVelocity();
+    return m_absEncoder19Teeth.getVelocity();
   }
 
   public double getAppliedVoltage() {
@@ -263,10 +266,17 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   private double getEncoderTeeth19() {
-    return m_encoder19Teeth.getPosition();
+    return m_absEncoder19Teeth.getPosition();
   }
 
   private double getEncoderTeeth21() {
-    return m_encoder21Teeth.getPosition();
+    return m_dutyCycleEncoder21Teeth.get() * TurretConstants.kEncoderMaxValue;
+  }
+
+  /**
+   * This method is only for the purpose of data tracking with Epilogue.
+   */
+  private double getRawDutyCycleEncoderPos() {
+    return m_dutyCycleEncoder21Teeth.get();
   }
 }

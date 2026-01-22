@@ -61,24 +61,16 @@ public final class Configs {
   }
 
   public static final class Turret {
-    public static final SparkMaxConfig turretMotorConfig19 = new SparkMaxConfig();
-    public static final SparkMaxConfig turretMotorConfig21 = new SparkMaxConfig();
+    public static final SparkMaxConfig turretMotorConfig = new SparkMaxConfig();
 
     static {
-      turretMotorConfig19.idleMode(IdleMode.kBrake).smartCurrentLimit(20);
-      turretMotorConfig21.idleMode(IdleMode.kBrake).smartCurrentLimit(20);
+      turretMotorConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(20);
 
-      turretMotorConfig19
+      turretMotorConfig
           .absoluteEncoder
           .inverted(false)
           .positionConversionFactor(19.0)
           .velocityConversionFactor(2 * Math.PI * (19.0 / 200.0) / 60.0);
-
-      turretMotorConfig21
-          .absoluteEncoder
-          .inverted(false)
-          .positionConversionFactor(21.0)
-          .velocityConversionFactor(2 * Math.PI * (21.0 / 200.0) / 60.0);
     }
   }
 }

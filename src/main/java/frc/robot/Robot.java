@@ -113,6 +113,8 @@ public class Robot extends TimedRobot {
                 () -> invertControls || !fieldRelative),
             adjustJoystick(driverController::getRightX, () -> speedMultiplier, () -> true),
             () -> fieldRelative));
+
+    turret.setDefaultCommand(turret.setVoltageCommand(() -> 0.0));
   }
 
   /**
