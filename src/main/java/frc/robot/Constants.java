@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -112,5 +115,32 @@ public final class Constants {
   public static final class TurretConstants {
     public static final int kTurretCANId = 41;
     public static final int kTurretCANId2 = 42;
+
+    public static final double kSTurret = 0.0;
+    public static final double kVTurret = 0.0;
+    public static final double kATurret = 0.0;
+
+    public static final double kPTurret = 0.0;
+    public static final double kITurret = 0.0;
+    public static final double kDTurret = 0.0;
+
+    public static final double kMaxVelocityTurret = 0.0;
+    public static final double kMaxAccelerationTurret = 0.0;
+  }
+
+  public static final class FieldConstants {
+    // U.S. Regionals all use the Welded field layout.
+    public static final AprilTagFieldLayout kTagLayout =
+        AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+
+    public static final Pose2d poseFromTag(int ID) {
+      return kTagLayout.getTagPose(ID).get().toPose2d();
+    }
+
+    // 4, 5 - 20, 21 - lower together is red, lower in pair is y
+    public static final Pose2d redHubCenter =
+        new Pose2d(poseFromTag(5).getX(), poseFromTag(4).getY(), new Rotation2d());
+    public static final Pose2d blueHubCenter =
+        new Pose2d(poseFromTag(21).getX(), poseFromTag(20).getY(), new Rotation2d());
   }
 }

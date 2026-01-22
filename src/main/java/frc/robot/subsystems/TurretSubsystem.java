@@ -6,9 +6,15 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 import frc.robot.Constants.TurretConstants;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 @Logged
 public class TurretSubsystem extends SubsystemBase {
@@ -19,7 +25,28 @@ public class TurretSubsystem extends SubsystemBase {
       new SparkMax(TurretConstants.kTurretCANId2, MotorType.kBrushless);
   private final AbsoluteEncoder m_encoder21Teeth = m_turretMotor2.getAbsoluteEncoder();
 
-  public TurretSubsystem() {
+  private final SimpleMotorFeedforward feedforward =
+      new SimpleMotorFeedforward(
+          TurretConstants.kSTurret, TurretConstants.kVTurret, TurretConstants.kATurret);
+  private double ff = 0.0;
+
+  private final PIDController feedback =
+      new PIDController(
+          TurretConstants.kPTurret, TurretConstants.kITurret, TurretConstants.kDTurret);
+  private double fb = 0.0;
+
+  private final TrapezoidProfile profile =
+      new TrapezoidProfile(
+          new TrapezoidProfile.Constraints(
+              TurretConstants.kMaxVelocityTurret, TurretConstants.kMaxAccelerationTurret));
+
+  private Supplier<Pose2d> robotPose;
+  private BooleanSupplier blueHub;
+
+  public TurretSubsystem(Supplier<Pose2d> robotPose, BooleanSupplier blueHub) {
+    this.robotPose = robotPose;
+    this.blueHub = blueHub;
+
     m_turretMotor.configure(
         Configs.Turret.turretMotorConfig19,
         ResetMode.kResetSafeParameters,
@@ -29,6 +56,11 @@ public class TurretSubsystem extends SubsystemBase {
         Configs.Turret.turretMotorConfig21,
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
+  }
+
+  public double getTargetAngleRadians() {
+    double robotToHubRadians = Math.atan2(ff, fb);
+    return 0.0;
   }
 
   /**
@@ -42,14 +74,14 @@ public class TurretSubsystem extends SubsystemBase {
   /**
    * This adjusts to the more precise number of radians that isn't based on whole numbers of teeth.
    */
-  public double getTeethPosRadiansAdjusted() {
+  private double getTeethPosRadiansAdjusted() {
     double teeth19 = getEncoderTeeth19();
-    double adjustment = (teeth19 - ((int) teeth19)) * (Math.PI / 100);
+    double adjustment = (teeth19 - ((int) teeth19)) * (Math.PI / 100.0);
     return getTeethPosRadians() + adjustment;
   }
 
   /** Converts the number of teeth to radians */
-  public double getTeethPosRadians() {
+  private double getTeethPosRadians() {
     return get200TeethPos() * Math.PI / 100.0;
   }
 
@@ -59,7 +91,7 @@ public class TurretSubsystem extends SubsystemBase {
    * forward in the center of its range of motion and that the turret has a range of motion smaller
    * than 360 degrees. This makes it the correct number of teeth.
    */
-  public int get200TeethPos() {
+  private int get200TeethPos() {
     int result = getCRTInitResult();
     if (result > 200) {
       result = result - 199;
@@ -110,15 +142,15 @@ public class TurretSubsystem extends SubsystemBase {
    *
    * <p>This is the resulting equation used below: x = (210 * g19 + 190 * g21) mod 399
    */
-  public int getCRTInitResult() {
+  private int getCRTInitResult() {
     return (210 * ((int) getEncoderTeeth19()) + 190 * ((int) getEncoderTeeth21())) % 399;
   }
 
-  public double getEncoderTeeth19() {
+  private double getEncoderTeeth19() {
     return m_encoder19Teeth.getPosition();
   }
 
-  public double getEncoderTeeth21() {
+  private double getEncoderTeeth21() {
     return m_encoder21Teeth.getPosition();
   }
 }
