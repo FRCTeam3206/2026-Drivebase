@@ -40,7 +40,7 @@ public class Robot extends TimedRobot {
 
   // The robot's subsystems
   private final DriveSubsystem robotDrive = new DriveSubsystem();
-  private final TurretSubsystem turret = new TurretSubsystem(robotDrive::getPose, () -> true);
+  private final TurretSubsystem turret = new TurretSubsystem(robotDrive::getPose);
 
   // fields that adjust the response for manual driving
   private boolean fieldRelative = true;

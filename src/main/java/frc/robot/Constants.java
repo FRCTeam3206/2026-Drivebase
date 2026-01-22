@@ -133,6 +133,10 @@ public final class Constants {
     public static final AprilTagFieldLayout kTagLayout =
         AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
 
+    // Length is greater than width
+    public static final double kFieldCenterX = kTagLayout.getFieldLength() / 2.0;
+    public static final double kFieldMaxX = kTagLayout.getFieldLength();
+
     public static final Pose2d poseFromTag(int ID) {
       return kTagLayout.getTagPose(ID).get().toPose2d();
     }

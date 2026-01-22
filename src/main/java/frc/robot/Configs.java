@@ -72,13 +72,13 @@ public final class Configs {
           .absoluteEncoder
           .inverted(false)
           .positionConversionFactor(19.0)
-          .velocityConversionFactor(19.0 / 60.0);
+          .velocityConversionFactor(2 * Math.PI * (19.0 / 200.0) / 60.0);
 
       turretMotorConfig21
           .absoluteEncoder
           .inverted(false)
           .positionConversionFactor(21.0)
-          .velocityConversionFactor(21.0 / 60.0);
+          .velocityConversionFactor(2 * Math.PI * (21.0 / 200.0) / 60.0);
     }
   }
 }

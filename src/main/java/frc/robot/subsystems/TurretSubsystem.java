@@ -9,9 +9,12 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.TurretConstants;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
@@ -35,17 +38,22 @@ public class TurretSubsystem extends SubsystemBase {
           TurretConstants.kPTurret, TurretConstants.kITurret, TurretConstants.kDTurret);
   private double fb = 0.0;
 
+  private TrapezoidProfile.State setpoint = new TrapezoidProfile.State();
+  private TrapezoidProfile.State goal = new TrapezoidProfile.State();
   private final TrapezoidProfile profile =
       new TrapezoidProfile(
           new TrapezoidProfile.Constraints(
               TurretConstants.kMaxVelocityTurret, TurretConstants.kMaxAccelerationTurret));
 
-  private Supplier<Pose2d> robotPose;
-  private BooleanSupplier blueHub;
+  private Supplier<Pose2d> robotPoseSupplier;
+  private BooleanSupplier blueBoolSupplier;
 
-  public TurretSubsystem(Supplier<Pose2d> robotPose, BooleanSupplier blueHub) {
-    this.robotPose = robotPose;
-    this.blueHub = blueHub;
+  private double targetAngle = Math.PI;
+  private Pose2d targetPose = new Pose2d();
+
+  public TurretSubsystem(Supplier<Pose2d> robotPoseSupplier) {
+    this.robotPoseSupplier = robotPoseSupplier;
+    this.blueBoolSupplier = () -> robotPoseSupplier.get().getX() < FieldConstants.kFieldCenterX;
 
     m_turretMotor.configure(
         Configs.Turret.turretMotorConfig19,
@@ -59,17 +67,101 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public double getTargetAngleRadians() {
-    double robotToHubRadians = Math.atan2(ff, fb);
-    return 0.0;
+    return targetAngle;
+  }
+
+  public Pose2d getTarget() {
+    return targetPose;
+  }
+
+  public Command setVoltage(double volts) {
+    return run(
+        () -> {
+          m_turretMotor.setVoltage(6 * volts);
+        });
+  }
+
+  public void faceTarget(Supplier<Pose2d> targetPoseSupplier) {
+    var cur_velocity = this.setpoint.velocity;
+    targetPose = targetPoseSupplier.get();
+    double robotToTargetRadians =
+        Math.atan2(
+            targetPose.getY() - robotPoseSupplier.get().getY(),
+            targetPose.getX() - robotPoseSupplier.get().getX());
+    this.goal =
+        new TrapezoidProfile.State(
+            robotToTargetRadians - robotPoseSupplier.get().getRotation().getRadians(), 0);
+    this.setpoint = profile.calculate(0.020, this.setpoint, this.goal);
+    ff = feedforward.calculateWithVelocities(cur_velocity, setpoint.velocity);
+    fb = feedback.calculate(getPosRadians(), setpoint.position);
+
+    double voltage = ff + fb;
+    m_turretMotor.setVoltage(voltage);
+  }
+
+  public Command faceTargetCommand(Supplier<Pose2d> targetPoseSupplier) {
+    return run(() -> faceTarget(targetPoseSupplier));
+  }
+
+  public Command faceHubCommand() {
+    return faceTargetCommand(
+        () ->
+            blueBoolSupplier.getAsBoolean()
+                ? FieldConstants.blueHubCenter
+                : FieldConstants.redHubCenter);
+  }
+
+  public Command faceCenterLineCommand() {
+    return faceTargetCommand(
+        () ->
+            new Pose2d(
+                FieldConstants.kFieldCenterX, robotPoseSupplier.get().getY(), new Rotation2d()));
+  }
+
+  public Command faceNearestAllianceCommand() {
+    return faceTargetCommand(
+        () ->
+            blueBoolSupplier.getAsBoolean()
+                ? new Pose2d(0.0, robotPoseSupplier.get().getY(), new Rotation2d())
+                : new Pose2d(
+                    FieldConstants.kFieldMaxX, robotPoseSupplier.get().getY(), new Rotation2d()));
+  }
+
+  public double getVelocity() {
+    return m_encoder19Teeth.getVelocity();
+  }
+
+  public double getAppliedVoltage() {
+    return m_turretMotor.getAppliedOutput() * m_turretMotor.getBusVoltage();
+  }
+
+  public double getBusVoltage() {
+    return m_turretMotor.getBusVoltage();
+  }
+
+  public double getCurrent() {
+    return m_turretMotor.getOutputCurrent();
+  }
+
+  public double getSetpoint() {
+    return setpoint.position;
+  }
+
+  public double getSetpointVelocity() {
+    return setpoint.velocity;
+  }
+
+  public double getGoal() {
+    return goal.position;
   }
 
   /**
    * This adjusts the turret position such that pi is facing forward and 0/2 pi is not in the range
    * of motion.
    */
-//   public double getPosRadians() {
-//     return (getTeethPosRadiansAdjusted() + Math.PI) % (2 * Math.PI);
-//   }
+  //   public double getPosRadians() {
+  //     return (getTeethPosRadiansAdjusted() + Math.PI) % (2 * Math.PI);
+  //   }
 
   /**
    * This adjusts to the more precise number of radians that isn't based on whole numbers of teeth.
@@ -91,13 +183,13 @@ public class TurretSubsystem extends SubsystemBase {
    * forward in the center of its range of motion and that the turret has a range of motion smaller
    * than 360 degrees. This makes it the correct number of teeth.
    */
-//   private int get200TeethPos() {
-//     int result = getCRTInitResult();
-//     if (result > 200) {
-//       result = result - 199;
-//     }
-//     return result;
-//   }
+  //   private int get200TeethPos() {
+  //     int result = getCRTInitResult();
+  //     if (result > 200) {
+  //       result = result - 199;
+  //     }
+  //     return result;
+  //   }
 
   /**
    * We can use the Chinese Remainder Theorem (CRT) to find the position of the large gear given the
