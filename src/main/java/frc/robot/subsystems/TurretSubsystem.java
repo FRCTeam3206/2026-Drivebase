@@ -25,9 +25,9 @@ import java.util.function.Supplier;
 public class TurretSubsystem extends SubsystemBase {
   private final SparkMax m_turretMotor =
       new SparkMax(TurretConstants.kTurretCANId, MotorType.kBrushless);
-  private final AbsoluteEncoder m_absEncoder19Teeth = m_turretMotor.getAbsoluteEncoder();
+  private final AbsoluteEncoder m_absEncoderMotor = m_turretMotor.getAbsoluteEncoder();
 
-  private final DutyCycleEncoder m_dutyCycleEncoder21Teeth =
+  private final DutyCycleEncoder m_dutyCycleEncoder =
       new DutyCycleEncoder(TurretConstants.kEncoderOnlyPort, 0.0, TurretConstants.kEncoderZero);
   // Unit conversion is taken care of elsewhere to ensure it doesn't interfere with setting zero.
 
@@ -127,7 +127,7 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public double getVelocity() {
-    return m_absEncoder19Teeth.getVelocity();
+    return m_absEncoderMotor.getVelocity();
   }
 
   public double getAppliedVoltage() {
@@ -155,19 +155,11 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   /**
-   * This adjusts the turret position such that pi is facing forward and 0/2 pi is not in the range
-   * of motion.
-   */
-  //   public double getPosRadians() {
-  //     return (getTeethPosRadiansAdjusted() + Math.PI) % (2 * Math.PI);
-  //   }
-
-  /**
    * This adjusts to the more precise number of radians that isn't based on whole numbers of teeth.
    */
   private double getPosRadians() {
-    double teeth19 = getEncoderTeeth19();
-    double adjustment = (teeth19 - ((int) teeth19)) * (Math.PI / 100.0);
+    double teethMotor = getEncoderTeethMotor();
+    double adjustment = (teethMotor - ((int) teethMotor)) * (Math.PI / 100.0);
     return getTeethPosRadians() + adjustment;
   }
 
@@ -177,80 +169,41 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   /**
-   * The initial CRT result assumes that the large gear has 399 teeth (19 * 21), but it actually has
-   * 200 teeth. We adjust for that here, with the assumption that 0 teeth is considered facing
-   * forward in the center of its range of motion and that the turret has a range of motion smaller
-   * than 360 degrees. This makes it the correct number of teeth.
-   */
-  //   private int get200TeethPos() {
-  //     int result = getCRTInitResult();
-  //     if (result > 200) {
-  //       result = result - 199;
-  //     }
-  //     return result;
-  //   }
-
-  /**
    * We can use the Chinese Remainder Theorem (CRT) to find the position of the large gear given the
-   * position of the 19-tooth and 21-tooth gears (this is possible because 19 and 21 are coprime,
-   * meaning they do not share any factors). To do this, we set up the following equations (where
-   * g19 is the position of the 19-tooth gear from 0 to 18 and g21 is the position of the 21-tooth
-   * gear from 0 to 20):
+   * position two smaller gears (the number of teeth on the smaller gears must be coprime). For more
+   * information on the CRT, see the following sources.
    *
-   * <p>x ≡ g19 (mod 19)
+   * <p>Explanation of concept: https://www.geeksforgeeks.org/maths/chinese-remainder-theorem/
    *
-   * <p>x ≡ g21 (mod 21)
+   * <p>How to solve: https://www.youtube.com/watch?v=zIFehsBHB8o
    *
-   * <p>To find x (which will be the number of teeth on the large gear), we use the CRT as follows:
-   *
-   * <p>M = m1 * m2 = 19 * 21 = 399
-   *
-   * <p>r1 = g19
-   *
-   * <p>r2 = g21
-   *
-   * <p>M1 = M / m1 = m2 = 21
-   *
-   * <p>M2 = M / m2 = m1 = 19
-   *
-   * <p>x1 = 10 (see below)
-   *
-   * <p>M1 * x1 ≡ 1 (mod m1)
-   *
-   * <p>21 * x1 ≡ 1 (mod 19) ≡ 210 (mod 19)
-   *
-   * <p>x2 = 10 (see below)
-   *
-   * <p>M2 * x2 ≡ 1 (mod m2)
-   *
-   * <p>19 * x2 ≡ 1 (mod 21) ≡ 190 (mod 21)
-   *
-   * <p>Therefore, we can combine these to conclude that:
-   *
-   * <p>x = (r1 * M1 * x1 + r2 * M2 * x2) mod 399
-   *
-   * <p>x = (g19 * 21 * 10 + g21 * 19 * 10) mod 399
-   *
-   * <p>This is the resulting equation used below: x = (210 * g19 + 190 * g21) mod 399
+   * <p>Background on modular arithmetic (especially modular inverses):
+   * https://www.khanacademy.org/computing/computer-science/cryptography/modarithmetic/a/modular-inverses
    */
   private int getCRTResult() {
-    // Allows us to set 0 as forward and then makes this 180 degrees
-    int teeth19 = (((int) getEncoderTeeth19()) + 100) % 19;
-    int teeth21 = (((int) getEncoderTeeth21()) + 100) % 21;
+    // Allows us to set 0 as forward and then makes this pi degrees
+    int teethMotor =
+        (((int) getEncoderTeethMotor()) + ((int) TurretConstants.kLargeGearTeeth / 2))
+            % TurretConstants.kGearTeethMotor;
+    int teethOther =
+        (((int) getEncoderTeethOther()) + ((int) TurretConstants.kLargeGearTeeth / 2))
+            % TurretConstants.kGearTeethOther;
 
-    return (210 * teeth19 + 190 * teeth21) % 399;
+    return (TurretConstants.kCRTGearMultiplierMotor * teethMotor
+            + TurretConstants.kCRTGearMultiplierOther * teethOther)
+        % (TurretConstants.kGearTeethMotor * TurretConstants.kGearTeethOther);
   }
 
-  private double getEncoderTeeth19() {
-    return m_absEncoder19Teeth.getPosition();
+  private double getEncoderTeethMotor() {
+    return m_absEncoderMotor.getPosition();
   }
 
-  private double getEncoderTeeth21() {
-    return m_dutyCycleEncoder21Teeth.get() * TurretConstants.kEncoderMaxValue;
+  private double getEncoderTeethOther() {
+    return m_dutyCycleEncoder.get() * TurretConstants.kEncoderMaxValue;
   }
 
   /** This method is only for the purpose of data tracking with Epilogue. */
   private double getRawDutyCycleEncoderPos() {
-    return m_dutyCycleEncoder21Teeth.get();
+    return m_dutyCycleEncoder.get();
   }
 }

@@ -5,6 +5,7 @@ import com.revrobotics.spark.config.AbsoluteEncoderConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.Constants.ModuleConstants;
+import frc.robot.Constants.TurretConstants;
 
 public final class Configs {
   public static final class MAXSwerveModule {
@@ -69,8 +70,8 @@ public final class Configs {
       turretMotorConfig
           .absoluteEncoder
           .inverted(false)
-          .positionConversionFactor(19.0)
-          .velocityConversionFactor(2 * Math.PI * (19.0 / 200.0) / 60.0);
+          .positionConversionFactor(TurretConstants.kGearTeethMotor)
+          .velocityConversionFactor(2 * Math.PI * (((double) TurretConstants.kGearTeethMotor) / ((double) TurretConstants.kLargeGearTeeth)) / 60.0);
     }
   }
 }

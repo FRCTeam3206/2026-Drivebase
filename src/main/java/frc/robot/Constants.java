@@ -119,6 +119,13 @@ public final class Constants {
     public static final double kEncoderMaxValue = 21.0;
     public static final double kEncoderZero = 0.0;
 
+    public static final int kGearTeethMotor = 19; // For the gear by the motor and an encoder
+    public static final int kGearTeethOther = 21; // For the gear by only an encoder
+    public static final int kLargeGearTeeth = 200;
+
+    public static final int kCRTGearMultiplierMotor = 210;
+    public static final int kCRTGearMultiplierOther = 190;
+
     public static final double kSTurret = 0.0;
     public static final double kVTurret = 0.0;
     public static final double kATurret = 0.0;
