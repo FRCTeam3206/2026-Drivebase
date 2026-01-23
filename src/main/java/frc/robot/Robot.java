@@ -34,7 +34,7 @@ import java.util.function.DoubleSupplier;
  * project.
  */
 @Logged
-public class  Robot extends TimedRobot {
+public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   // The robot's subsystems
