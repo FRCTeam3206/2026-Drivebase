@@ -181,13 +181,8 @@ public class TurretSubsystem extends SubsystemBase {
    * https://www.khanacademy.org/computing/computer-science/cryptography/modarithmetic/a/modular-inverses
    */
   private int getCRTResult() {
-    // Allows us to set 0 as forward and then makes this pi degrees
-    int teethMotor =
-        (((int) getEncoderTeethMotor()) + ((int) TurretConstants.kLargeGearTeeth / 2))
-            % TurretConstants.kGearTeethMotor;
-    int teethOther =
-        (((int) getEncoderTeethOther()) + ((int) TurretConstants.kLargeGearTeeth / 2))
-            % TurretConstants.kGearTeethOther;
+    int teethMotor = (int) getEncoderTeethMotor();
+    int teethOther = (int) getEncoderTeethOther();
 
     return (TurretConstants.kCRTGearMultiplierMotor * teethMotor
             + TurretConstants.kCRTGearMultiplierOther * teethOther)
