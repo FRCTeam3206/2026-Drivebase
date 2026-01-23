@@ -36,8 +36,8 @@ public class DriveSubsystemTest {
         System.out.println("okkkk");
         //method overloading PMO!!!
         System.out.println("" + initialX + '\n' + initialY + '\n' +newX +  '\n' + newY + '\n');
-        Assertions.assertTrue(newX < initialX, "Moved forward on the X coordinate");
-        Assertions.assertTrue(newY <  initialY, "Moved forward on the Y coordinate");
+        Assertions.assertTrue(newX > initialX, "Moved forward on the X coordinate");
+        Assertions.assertTrue(newY >  initialY, "Moved forward on the Y coordinate");
       }),
       driveSubsystem
     );
