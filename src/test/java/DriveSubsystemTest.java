@@ -1,10 +1,9 @@
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Timeout;
 
 import frc.robot.subsystems.DriveSubsystem;
 import util.CommandRunner;
@@ -30,13 +29,18 @@ public class DriveSubsystemTest {
     final double initialX = driveSubsystem.getPose().getX();
     final double initialY = driveSubsystem.getPose().getY();
     System.out.println("mrow");
-    commands.addSubsystem(driveSubsystem);
     commands.runOnce(
-      driveSubsystem.driveCommand(()->0.1, ()->0.1, ()->0, ()->false).withTimeout(4).andThen(()->{
+      driveSubsystem.driveCommand(()->5, ()->5, ()->0, ()->false).withTimeout(4).andThen(()->{
+        double newX = driveSubsystem.getPose().getX();
+        double newY = driveSubsystem.getPose().getY();
         System.out.println("okkkk");
-        Assertions.assertTrue(driveSubsystem.getPose().getX() > initialX);
-        Assertions.assertTrue(driveSubsystem.getPose().getY() > initialY);
-      })
+        //method overloading PMO!!!
+        System.out.println("" + initialX + '\n' + initialY + '\n' +newX +  '\n' + newY + '\n');
+        Assertions.assertTrue(newX < initialX, "Moved forward on the X coordinate");
+        Assertions.assertTrue(newY <  initialY, "Moved forward on the Y coordinate");
+      }),
+      driveSubsystem
     );
+    return;
     }
 }
