@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.PersistMode;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
@@ -31,10 +30,6 @@ public class TurretSubsystem extends SubsystemBase {
   private final DutyCycleEncoder m_dutyCycleEncoder =
       new DutyCycleEncoder(TurretConstants.kEncoderOnlyPort, 0.0, TurretConstants.kEncoderZero);
   // Unit conversion is taken care of elsewhere to ensure it doesn't interfere with setting zero.
-
-  private final RelativeEncoder m_relativeEncoder = m_turretMotor.getEncoder();
-
-  private boolean absoluteMode = true;
 
   private final SimpleMotorFeedforward feedforward =
       new SimpleMotorFeedforward(
@@ -132,7 +127,7 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public double getVelocity() {
-    return absoluteMode ? m_absEncoderMotor.getVelocity() : m_relativeEncoder.getVelocity();
+    return m_absEncoderMotor.getVelocity();
   }
 
   public double getAppliedVoltage() {
@@ -159,19 +154,11 @@ public class TurretSubsystem extends SubsystemBase {
     return goal.position;
   }
 
-  public double getAngleRadians() {
-    if (absoluteMode) {
-      return getAngleRadiansAbsolute();
-    } else {
-      return getAngleRadiansRelative();
-    }
-  }
-
   /**
    * Current position of the turret in radians, using other methods with the Chinese Remainder
    * Theorem.
    */
-  private double getAngleRadiansAbsolute() {
+  private double getAngleRadians() {
     return getCRTResultAdjusted() * 2.0 * Math.PI / TurretConstants.kLargeGearTeeth;
   }
 
@@ -238,9 +225,5 @@ public class TurretSubsystem extends SubsystemBase {
   /** This method is only for the purpose of data tracking with Epilogue. */
   private double getRawDutyCycleEncoderPos() {
     return m_dutyCycleEncoder.get();
-  }
-
-  private double getAngleRadiansRelative() {
-    return m_relativeEncoder.getPosition();
   }
 }
