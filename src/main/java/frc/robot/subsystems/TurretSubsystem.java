@@ -92,7 +92,7 @@ public class TurretSubsystem extends SubsystemBase {
     this.setpoint = profile.calculate(0.020, this.setpoint, this.goal);
 
     ff = feedforward.calculateWithVelocities(cur_velocity, setpoint.velocity);
-    fb = feedback.calculate(getPosRadians(), setpoint.position);
+    fb = feedback.calculate(getAngleRadians(), setpoint.position);
 
     double voltage = ff + fb;
     m_turretMotor.setVoltage(voltage);
@@ -155,17 +155,33 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   /**
-   * This adjusts to the more precise number of radians that isn't based on whole numbers of teeth.
+   * Current position of the turret in radians, using other methods with the Chinese Remainder
+   * Theorem.
    */
-  private double getPosRadians() {
-    double teethMotor = getEncoderTeethMotor();
-    double adjustment = (teethMotor - ((int) teethMotor)) * (Math.PI / 100.0);
-    return getTeethPosRadians() + adjustment;
+  private double getAngleRadians() {
+    return getCRTResultAdjusted() * 2.0 * Math.PI / TurretConstants.kLargeGearTeeth;
   }
 
-  /** Converts the number of teeth to radians */
-  private double getTeethPosRadians() {
-    return getCRTResult() * Math.PI / 100.0;
+  /** This adjusts to a decimal number of teeth for more accurate results. */
+  private double getCRTResultAdjusted() {
+    double teethMotor = getEncoderTeethMotor();
+    double adjustment =
+        (teethMotor - ((int) teethMotor)) * (2.0 * Math.PI / TurretConstants.kLargeGearTeeth);
+    return getCRTResultCorrected() + adjustment;
+  }
+
+  /**
+   * Corrects for results that go backward over 0, since it would think that it's now at 390 teeth
+   * or something similar otherwise. Also, corrects the 0 position to instead be half a rotation.
+   */
+  private int getCRTResultCorrected() {
+    int teeth = getCRTInitResult();
+    if (teeth > TurretConstants.kLargeGearTeeth / 2) {
+      teeth =
+          TurretConstants.kLargeGearTeeth
+              - (TurretConstants.kGearTeethMotor * TurretConstants.kGearTeethOther - teeth);
+    }
+    return (teeth + TurretConstants.kLargeGearTeeth / 2) % TurretConstants.kLargeGearTeeth;
   }
 
   /**
@@ -180,9 +196,18 @@ public class TurretSubsystem extends SubsystemBase {
    * <p>Background on modular arithmetic (especially modular inverses):
    * https://www.khanacademy.org/computing/computer-science/cryptography/modarithmetic/a/modular-inverses
    */
-  private int getCRTResult() {
+  private int getCRTInitResult() {
     int teethMotor = (int) getEncoderTeethMotor();
-    int teethOther = (int) getEncoderTeethOther();
+    /*
+     * The additional calculations below prevent the situation where one gear is at 1.99 teeth and the
+     * other is at 2.00 teeth, but then one becomes an int at 1 tooth and the other is at 2 teeth (or
+     * something similar). This is important to avoid because if they were off a little bit, it could
+     * entirely throw off the position of the turret overall. Simply rounding both to the nearest int
+     * would not solve this problem either, because the same thing could happen if one was at 1.49 and
+     * the other was at 1.50 (or a similar situation).
+     */
+    int teethOther =
+        (int) Math.round(getEncoderTeethOther() - (getEncoderTeethMotor() - teethMotor));
 
     return (TurretConstants.kCRTGearMultiplierMotor * teethMotor
             + TurretConstants.kCRTGearMultiplierOther * teethOther)
