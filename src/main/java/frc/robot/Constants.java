@@ -119,9 +119,6 @@ public final class Constants {
     public static final double kEncoderMaxValue = 21.0;
     public static final double kEncoderZero = 0.0;
 
-    public static final int kLowerLimitPort = 1;
-    public static final int kUpperLimitPort = 2;
-
     public static final double kSTurret = 0.0;
     public static final double kVTurret = 0.0;
     public static final double kATurret = 0.0;

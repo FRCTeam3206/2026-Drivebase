@@ -11,7 +11,6 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -30,10 +29,7 @@ public class TurretSubsystem extends SubsystemBase {
 
   private final DutyCycleEncoder m_dutyCycleEncoder21Teeth =
       new DutyCycleEncoder(TurretConstants.kEncoderOnlyPort, 0.0, TurretConstants.kEncoderZero);
-      // Unit conversion is taken care of elsewhere to ensure it doesn't interfere with setting zero.
-
-  private final DigitalInput m_lowerLimitSwitch = new DigitalInput(TurretConstants.kLowerLimitPort);
-  private final DigitalInput m_upperLimitSwitch = new DigitalInput(TurretConstants.kUpperLimitPort);
+  // Unit conversion is taken care of elsewhere to ensure it doesn't interfere with setting zero.
 
   private final SimpleMotorFeedforward feedforward =
       new SimpleMotorFeedforward(
@@ -76,30 +72,10 @@ public class TurretSubsystem extends SubsystemBase {
     return targetPose;
   }
 
-  public boolean atLowerLimit() {
-    return m_lowerLimitSwitch.get();
-  }
-
-  public boolean atUpperLimit() {
-    return m_upperLimitSwitch.get();
-  }
-
-  /**
-   * This method should always be used for setting motor voltage, not directly with the motor. This ensures that it can't go over the limit.
-   * @param volts The volts to set to the turret motor
-   */
-  public void setVoltage(double volts) {
-    if ((atLowerLimit() && volts < 0.0) || (atUpperLimit() && volts > 0.0)) {
-      m_turretMotor.setVoltage(0);
-    } else {
-      m_turretMotor.setVoltage(6 * volts);
-    }
-  }
-
   public Command setVoltageCommand(DoubleSupplier voltsSupplier) {
     return run(
         () -> {
-          setVoltage(voltsSupplier.getAsDouble());
+          m_turretMotor.setVoltage(6 * voltsSupplier.getAsDouble());
         });
   }
 
@@ -119,7 +95,7 @@ public class TurretSubsystem extends SubsystemBase {
     fb = feedback.calculate(getPosRadians(), setpoint.position);
 
     double voltage = ff + fb;
-    setVoltage(voltage);
+    m_turretMotor.setVoltage(voltage);
   }
 
   public Command faceTargetCommand(Supplier<Pose2d> targetPoseSupplier) {
@@ -273,9 +249,7 @@ public class TurretSubsystem extends SubsystemBase {
     return m_dutyCycleEncoder21Teeth.get() * TurretConstants.kEncoderMaxValue;
   }
 
-  /**
-   * This method is only for the purpose of data tracking with Epilogue.
-   */
+  /** This method is only for the purpose of data tracking with Epilogue. */
   private double getRawDutyCycleEncoderPos() {
     return m_dutyCycleEncoder21Teeth.get();
   }
