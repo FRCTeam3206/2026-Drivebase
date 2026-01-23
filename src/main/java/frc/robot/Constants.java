@@ -110,7 +110,7 @@ public final class Constants {
   }
 
   /*Change Later. Launcher Motors */
-  public static final class ShooterConstants{
+  public static final class ShooterConstants {
     public static final int kTopLauncherMotor = 15;
     public static final int kBottomLauncherMotor = 16;
   }

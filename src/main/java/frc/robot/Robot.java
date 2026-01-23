@@ -25,7 +25,6 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
-
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
@@ -41,6 +40,7 @@ public class Robot extends TimedRobot {
 
   // The robot's subsystems
   private final DriveSubsystem robotDrive = new DriveSubsystem();
+  private final ShooterSubsystem fuelLauncher = new ShooterSubsystem();
 
   // fields that adjust the response for manual driving
   private boolean fieldRelative = true;
@@ -72,8 +72,6 @@ public class Robot extends TimedRobot {
     backend.log("Robot/buildInfo/commitId", BuildConstants.GIT_SHA);
   }
 
-private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
-
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -99,7 +97,8 @@ private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
         .a()
         .onTrue(robotDrive.runOnce(() -> robotDrive.zeroHeading(robotDrive.getPose())));
     driverController.start().onTrue(new InstantCommand(() -> resetRobotToFieldCenter()));
-    driverController.rightTrigger().whileTrue(shooterSubsystem.launchCommand());  }
+    driverController.rightTrigger().whileTrue(fuelLauncher.launchCommand());
+  }
 
   /** Use this method to define default commands for subsystems. */
   private void configureDefaultCommands() {
