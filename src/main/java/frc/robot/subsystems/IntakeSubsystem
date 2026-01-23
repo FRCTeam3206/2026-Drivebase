@@ -1,0 +1,15 @@
+public class IntakeSubsystem extends SubsystemBase {
+    private final SparkMax m_TopIntakeMotor = new SparkMax(IntakeConstants.kTopIntakeMotor, Motortype.Brushless);
+    private final SparkMax m_BottomIntakeMotor = new SparkMax(IntakeConstants.kBottomIntakeMotor, Motortype.Brushless);
+    private final SparkMax m_DeployIntake = new SparkMax(IntakeConstants.kDeployIntakeMotor, Motortype.Brushless)
+    public IntakeSubystem() {}
+
+    public Command intakeBalls() {
+        return this.run(()-> {m_TopIntakeMotor, m_BottomIntakeMotor}.set(0.8))
+            .withTimeout(1)
+            .finallyDo({m_TopIntakeMotor, m_BottomIntakeMotor}.set(0.8));
+    }
+    public Command deployIntake() {
+        return 
+    }
+}

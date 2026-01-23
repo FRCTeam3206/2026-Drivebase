@@ -108,4 +108,9 @@ public final class Constants {
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
   }
+  public static final class IntakeConstants {
+    public static final int kBottomIntakeMotor = 31;
+    public static final int kTopIntakeMotor = 32;
+    public static final int kDeployIntakeMotor = 39;
+  }
 }
