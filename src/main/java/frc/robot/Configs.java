@@ -71,7 +71,12 @@ public final class Configs {
           .absoluteEncoder
           .inverted(false)
           .positionConversionFactor(TurretConstants.kGearTeethMotor)
-          .velocityConversionFactor(2 * Math.PI * (((double) TurretConstants.kGearTeethMotor) / ((double) TurretConstants.kLargeGearTeeth)) / 60.0);
+          .velocityConversionFactor(
+              2
+                  * Math.PI
+                  * (((double) TurretConstants.kGearTeethMotor)
+                      / ((double) TurretConstants.kLargeGearTeeth))
+                  / 60.0);
     }
   }
 }

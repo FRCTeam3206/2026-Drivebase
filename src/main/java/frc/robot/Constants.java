@@ -123,6 +123,17 @@ public final class Constants {
     public static final int kGearTeethOther = 21; // For the gear by only an encoder
     public static final int kLargeGearTeeth = 200;
 
+    /*
+     * See Desmos graph for the calculation results for teeth pairs of 19 & 21, 20 & 19, or 20 & 21:
+     * https://www.desmos.com/calculator/helfldylbj
+     *
+     * 19 & 21: multipliers are 210 & 190
+     * 20 & 21: multipliers are 21 & 400
+     * 20 & 19: multipliers are 361 & 20
+     *
+     * Note: this uses the Chinese Remainder Theorem (CRT), as explained in the "getCRTResult"
+     * method of TurretSubsystem.
+     */
     public static final int kCRTGearMultiplierMotor = 210;
     public static final int kCRTGearMultiplierOther = 190;
 
