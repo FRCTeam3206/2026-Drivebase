@@ -26,6 +26,7 @@ import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.DriveSubsystem;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+import frc.robot.subsystems.IntakeSubsystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -39,6 +40,7 @@ public class Robot extends TimedRobot {
 
   // The robot's subsystems
   private final DriveSubsystem robotDrive = new DriveSubsystem();
+  private final IntakeSubsystem fuelIntake = new IntakeSubsystem();
 
   // fields that adjust the response for manual driving
   private boolean fieldRelative = true;
@@ -95,6 +97,10 @@ public class Robot extends TimedRobot {
         .a()
         .onTrue(robotDrive.runOnce(() -> robotDrive.zeroHeading(robotDrive.getPose())));
     driverController.start().onTrue(new InstantCommand(() -> resetRobotToFieldCenter()));
+    driverController.rightBumper().whileTrue(fuelIntake.intakeBalls()).onFalse(fuelIntake.stopIntakeBalls());
+          
+    driverController.leftBumper().onTrue(fuelIntake.deployIntake());
+    driverController.b().onTrue(fuelIntake.returnIntake());
   }
 
   /** Use this method to define default commands for subsystems. */
