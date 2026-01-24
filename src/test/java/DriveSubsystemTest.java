@@ -52,6 +52,7 @@ public class DriveSubsystemTest {
   }
 
   @Test
+  @Timeout(3)
   public final void turn() throws InterruptedException {
       final double initialRotation = driveSubsystem.getPose().getRotation().getDegrees();
       commands.runOnce(
