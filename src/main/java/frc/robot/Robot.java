@@ -24,9 +24,9 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.OIConstants;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-import frc.robot.subsystems.IntakeSubsystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -97,10 +97,12 @@ public class Robot extends TimedRobot {
         .a()
         .onTrue(robotDrive.runOnce(() -> robotDrive.zeroHeading(robotDrive.getPose())));
     driverController.start().onTrue(new InstantCommand(() -> resetRobotToFieldCenter()));
-    driverController.rightBumper().whileTrue(fuelIntake.intakeBalls()).onFalse(fuelIntake.stopIntakeBalls());
-          
-    driverController.leftBumper().onTrue(fuelIntake.deployIntake());
-    driverController.b().onTrue(fuelIntake.returnIntake());
+    driverController
+        .rightBumper()
+        .whileTrue(fuelIntake.intakeBalls().alongWith(fuelIntake.deployIntake()));
+    driverController
+        .rightBumper()
+        .onFalse((fuelIntake.stopIntakeBalls().alongWith(fuelIntake.returnIntake())));
   }
 
   /** Use this method to define default commands for subsystems. */
