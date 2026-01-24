@@ -1,9 +1,12 @@
 import frc.robot.subsystems.DriveSubsystem;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+
+import edu.wpi.first.math.geometry.Pose2d;
 import util.CommandRunner;
 
 public class DriveSubsystemTest {
@@ -12,8 +15,12 @@ public class DriveSubsystemTest {
 
   @BeforeAll
   public static final void startup() throws InterruptedException {
-    System.out.println("i have to piss readlly hard");
     commands.start();
+  }
+
+  @AfterEach
+  public final void resetRobot() {
+    driveSubsystem.resetOdometry(new Pose2d());
   }
 
   @AfterAll
@@ -26,7 +33,6 @@ public class DriveSubsystemTest {
   public final void drive() throws InterruptedException {
     final double initialX = driveSubsystem.getPose().getX();
     final double initialY = driveSubsystem.getPose().getY();
-    System.out.println("mrow");
     commands.runOnce(
         driveSubsystem
             .driveCommand(() -> 5, () -> 5, () -> 0, () -> false)
@@ -35,14 +41,29 @@ public class DriveSubsystemTest {
                 () -> {
                   double newX = driveSubsystem.getPose().getX();
                   double newY = driveSubsystem.getPose().getY();
-                  System.out.println("okkkk");
                   // method overloading PMO!!!
                   System.out.println(
-                      "" + initialX + '\n' + initialY + '\n' + newX + '\n' + newY + '\n');
+                      "Started at " + initialX + ',' + initialY + '\n' +"Ended at " + newX + ',' + newY + '\n');
                   Assertions.assertTrue(newX > initialX, "Moved forward on the X coordinate");
                   Assertions.assertTrue(newY > initialY, "Moved forward on the Y coordinate");
                 }),
         driveSubsystem);
     return;
+  }
+
+  @Test
+  public final void turn() throws InterruptedException {
+      final double initialRotation = driveSubsystem.getPose().getRotation().getDegrees();
+      commands.runOnce(
+          driveSubsystem
+            .driveCommand(()->0, ()->0, ()->2, ()->false)
+            .withTimeout(2)
+            .andThen(()->{
+              final double newRotation = driveSubsystem.getPose().getRotation().getDegrees();
+              System.out.println("Started at " + initialRotation + '\n' + "Ended at " + newRotation);
+              Assertions.assertTrue(newRotation > initialRotation, "Robot rotates");
+            }),
+        driveSubsystem);
+      return;
   }
 }
