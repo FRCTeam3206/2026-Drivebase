@@ -38,7 +38,7 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   // The robot's subsystems
-  private final DriveSubsystem robotDrive = new DriveSubsystem();
+  public final DriveSubsystem robotDrive = new DriveSubsystem();
 
   // fields that adjust the response for manual driving
   private boolean fieldRelative = true;

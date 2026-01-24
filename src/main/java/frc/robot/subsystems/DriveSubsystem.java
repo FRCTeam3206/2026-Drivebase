@@ -24,7 +24,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 @Logged
-public class DriveSubsystem extends SubsystemBase {
+public class DriveSubsystem extends SubsystemBase implements AutoCloseable {
   // Create MAXSwerveModules
   private final MAXSwerveModule m_frontLeft =
       new MAXSwerveModule(
@@ -113,6 +113,10 @@ public class DriveSubsystem extends SubsystemBase {
 
     double dTheta = (m_speedsRequested.omegaRadiansPerSecond * timestep) * 180 / Math.PI;
     m_navxSimAngle.set(m_navxSimAngle.get() - dTheta);
+  }
+
+  public void close() {
+    navx.close();
   }
 
   /**

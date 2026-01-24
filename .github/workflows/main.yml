@@ -30,4 +30,5 @@ jobs:
     - name: Compile and run tests on robot code
       run: |
           chmod +x ./gradlew
-          ./gradlew build
+          ./gradlew test
+
