@@ -168,4 +168,10 @@ public final class Constants {
     public static final Pose2d blueHubCenter =
         new Pose2d(poseFromTag(21).getX(), poseFromTag(20).getY(), new Rotation2d());
   }
+
+  /*Change Later. Launcher Motors */
+  public static final class ShooterConstants {
+    public static final int kTopLauncherMotor = 21;
+    public static final int kBottomLauncherMotor = 22;
+  }
 }
