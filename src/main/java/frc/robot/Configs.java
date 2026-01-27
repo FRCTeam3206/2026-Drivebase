@@ -81,10 +81,11 @@ public final class Configs {
   }
 
   public static final class Shooter {
-    public static final SparkMaxConfig shooterConfig= new SparkMaxConfig();
+    public static final SparkMaxConfig shooterConfig = new SparkMaxConfig();
+
     static {
       shooterConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(60);
-      shooterConfig.encoder.velocityConversionFactor(1); //Rotation per minute
+      shooterConfig.encoder.velocityConversionFactor(1); // Rotation per minute
     }
   }
 }
