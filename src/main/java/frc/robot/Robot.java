@@ -29,7 +29,6 @@ import frc.robot.pathing.utils.AllianceUtil;
 import frc.robot.subsystems.DriveSubsystem;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-import java.util.jar.Attributes.Name;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -177,14 +176,18 @@ public class Robot extends TimedRobot {
     // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
-    // block in order for anything in the Command-based framework to work. 
+    // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
   }
 
   public void autons() {
-    m_autonChooser.addOption("example", robotDrive.getToGoal(new Pose2d(0, 0, Rotation2d.fromDegrees(0))));
-    m_autonChooser.setDefaultOption("practice", robotDrive.getToGoal(new Pose2d(15, 15, Rotation2d.fromDegrees(15))));
-    m_autonChooser.addOption("red_trench", robotDrive.getToGoal(new Pose2d(467.64, 292.31, Rotation2d.fromDegrees(180))));
+    m_autonChooser.addOption(
+        "example", robotDrive.getToGoalCommand(new Pose2d(0, 0, Rotation2d.fromDegrees(0))));
+    m_autonChooser.setDefaultOption(
+        "practice", robotDrive.getToGoalCommand(new Pose2d(2, 3, Rotation2d.fromDegrees(15))));
+    m_autonChooser.addOption(
+        "red_trench",
+        robotDrive.getToGoalCommand(new Pose2d(467.64, 292.31, Rotation2d.fromDegrees(180))));
 
     SmartDashboard.putData("Auton Chooser", m_autonChooser);
   }
@@ -195,7 +198,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledPeriodic() {
-     AllianceUtil.setAlliance();
+    AllianceUtil.setAlliance();
   }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */

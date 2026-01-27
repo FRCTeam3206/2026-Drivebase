@@ -25,11 +25,11 @@ import frc.robot.Constants.PathingConstants;
 import frc.robot.pathing.PathingCommand;
 import frc.robot.pathing.PathingCommandGenerator;
 import frc.robot.pathing.robotprofile.RobotProfile;
-
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
-@Logged  
+@Logged
 public class DriveSubsystem extends SubsystemBase {
   // Create MAXSwerveModules
   private final MAXSwerveModule m_frontLeft =
@@ -81,7 +81,7 @@ public class DriveSubsystem extends SubsystemBase {
       DriveConstants.kDriveKinematics.toChassisSpeeds(m_statesRequested);
   private ChassisSpeeds m_speedsMeasured = m_speedsRequested;
 
-   RobotProfile m_robotProfile =
+  RobotProfile m_robotProfile =
       new RobotProfile(
               PathingConstants.kRobotMassKg,
               ModuleConstants.kWheelDiameterMeters,
@@ -94,7 +94,7 @@ public class DriveSubsystem extends SubsystemBase {
               PathingConstants.kRotVelocitySafety,
               PathingConstants.kRotAccelSafety);
   PathingCommandGenerator m_pathGen =
-      new PathingCommandGenerator(m_robotProfile, this::getPose, this::driveSpeed, this)
+      new PathingCommandGenerator(m_robotProfile, this::getPose, this::driveChassisSpeed, this)
           .withAllianceFlipping(false)
           .withTolerances(
               PathingConstants.kTranslationTolerance,
@@ -191,7 +191,7 @@ public class DriveSubsystem extends SubsystemBase {
     setModuleStates(swerveModuleStates);
   }
 
-  public void driveSpeed(ChassisSpeeds speeds) {
+  public void driveChassisSpeed(ChassisSpeeds speeds) {
     drive(
         speeds.vxMetersPerSecond / DriveConstants.kMaxSpeedMetersPerSecond,
         speeds.vyMetersPerSecond / DriveConstants.kMaxSpeedMetersPerSecond,
@@ -253,8 +253,12 @@ public class DriveSubsystem extends SubsystemBase {
     return navx.getRotation2d().getDegrees();
   }
 
-  public PathingCommand getToGoal(Pose2d goal) {
-    return m_pathGen.generateToPoseCommand(goal);
+  public PathingCommand getToGoalSupplierCommand(Supplier<Pose2d> goalSupplier) {
+    return m_pathGen.generateToPoseSupplierCommand(goalSupplier);
+  }
+
+  public PathingCommand getToGoalCommand(Pose2d goal) {
+    return getToGoalSupplierCommand(() -> goal);
   }
 
   /**
@@ -291,5 +295,13 @@ public class DriveSubsystem extends SubsystemBase {
   /** Command to set the wheels into an X formation to prevent movement. */
   public Command setXCommand() {
     return run(this::setX);
+  }
+
+  public Command stopCommand() {
+    return driveCommand(() -> 0.0, () -> 0.0, () -> 0.0, () -> true);
+  }
+
+  public Command stopOnceCommand() {
+    return this.runOnce(() -> drive(0, 0, 0, true));
   }
 }

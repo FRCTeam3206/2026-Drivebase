@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -123,8 +126,27 @@ public final class Constants {
     public static final double kRotVelocitySafety = 1;
     public static final double kRotAccelSafety = 1;
     public static final double kRobotMassKg = 63.5;
-    public static final double kRobotLengthWidthMeters =
-        Units.inchesToMeters(36);
+    public static final double kRobotLengthWidthMeters = Units.inchesToMeters(36);
     public static final Motor kDriveMotor = Motor.NEO().gear(4.71);
+  }
+
+  public static final class FieldConstants {
+    // U.S. Regionals all use the Welded field layout.
+    public static final AprilTagFieldLayout kTagLayout =
+        AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+
+    // Length is greater than width
+    public static final double kFieldCenterX = kTagLayout.getFieldLength() / 2.0;
+    public static final double kFieldMaxX = kTagLayout.getFieldLength();
+
+    public static final Pose2d poseFromTag(int ID) {
+      return kTagLayout.getTagPose(ID).get().toPose2d();
+    }
+
+    // 4, 5 - 20, 21 - lower together is red, lower in pair is y
+    public static final Pose2d redHubCenter =
+        new Pose2d(poseFromTag(5).getX(), poseFromTag(4).getY(), new Rotation2d());
+    public static final Pose2d blueHubCenter =
+        new Pose2d(poseFromTag(21).getX(), poseFromTag(20).getY(), new Rotation2d());
   }
 }
