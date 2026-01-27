@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.launcher;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
