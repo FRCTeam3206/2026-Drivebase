@@ -174,4 +174,8 @@ public final class Constants {
     public static final int kTopLauncherMotor = 21;
     public static final int kBottomLauncherMotor = 22;
   }
+  
+  public static final class TransportConstants {
+    public static final int kTransportMotorCANid = 61;
+  }
 }
