@@ -240,6 +240,7 @@ public class Robot extends TimedRobot {
         prevAlliance = alliance;
       }
     }
+    AllianceUtil.setAlliance();
   }
 
   /** This function is called periodically during operator control. */

@@ -94,8 +94,13 @@ public class DriveSubsystem extends SubsystemBase {
               PathingConstants.kRotVelocitySafety,
               PathingConstants.kRotAccelSafety);
   PathingCommandGenerator m_pathGen =
-      new PathingCommandGenerator(m_robotProfile, this::getPose, this::driveChassisSpeed, this, "rebuilt_2026_welded.json")
-          .withAllianceFlipping(false)
+      new PathingCommandGenerator(
+              m_robotProfile,
+              this::getPose,
+              this::driveChassisSpeed,
+              this,
+              "rebuilt_2026_welded.json")
+          .withAllianceFlipping(true)
           .withTolerances(
               PathingConstants.kTranslationTolerance,
               PathingConstants.kRotationTolerance,
@@ -150,6 +155,10 @@ public class DriveSubsystem extends SubsystemBase {
   public Pose2d getPose() {
     return m_odometry.getPoseMeters();
   }
+
+  // public Pose2d getPoseDriverRelative(){
+
+  // }
 
   /**
    * Resets the odometry to the specified pose.

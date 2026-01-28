@@ -126,7 +126,7 @@ public final class Constants {
     public static final double kRotVelocitySafety = 1;
     public static final double kRotAccelSafety = 1;
     public static final double kRobotMassKg = 63.5;
-    public static final double kRobotLengthWidthMeters = Units.inchesToMeters(36);
+    public static final double kRobotLengthWidthMeters = Units.inchesToMeters(30);
     public static final Motor kDriveMotor = Motor.NEO().gear(4.71);
   }
 
