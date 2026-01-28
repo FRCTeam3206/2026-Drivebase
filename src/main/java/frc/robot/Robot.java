@@ -25,8 +25,6 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.OIConstants;
 import frc.robot.launcher.TurretSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.subsystems.ShooterSubsystem;
-import frc.robot.subsystems.TransportSubsystem;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
@@ -43,8 +41,6 @@ public class Robot extends TimedRobot {
   // The robot's subsystems
   private final DriveSubsystem robotDrive = new DriveSubsystem();
   private final TurretSubsystem turret = new TurretSubsystem(robotDrive::getPose);
-  private final ShooterSubsystem fuelLauncher = new ShooterSubsystem();
-  private final TransportSubsystem fuelTransport = new TransportSubsystem();
 
   // fields that adjust the response for manual driving
   private boolean fieldRelative = true;
@@ -101,8 +97,6 @@ public class Robot extends TimedRobot {
         .a()
         .onTrue(robotDrive.runOnce(() -> robotDrive.zeroHeading(robotDrive.getPose())));
     driverController.start().onTrue(new InstantCommand(() -> resetRobotToFieldCenter()));
-    driverController.rightTrigger().whileTrue(fuelLauncher.launchCommand());
-    driverController.leftTrigger().onTrue(fuelTransport.ballTransport());
   }
 
   /** Use this method to define default commands for subsystems. */
