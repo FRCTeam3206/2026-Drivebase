@@ -97,7 +97,7 @@ public class Robot extends TimedRobot {
         .a()
         .onTrue(robotDrive.runOnce(() -> robotDrive.zeroHeading(robotDrive.getPose())));
     driverController.start().onTrue(new InstantCommand(() -> resetRobotToFieldCenter()));
-    driverController.rightTrigger().whileTrue(fuelLauncher.launchCommand());
+    fuelLauncher.setDefaultCommand(fuelLauncher.launchCommand());
   }
 
   /** Use this method to define default commands for subsystems. */
