@@ -41,13 +41,13 @@ public class ShooterSubsystem extends SubsystemBase {
   public Command launchCommand() {
     return this.run(
             () -> {
-              topWheel.set(0.8);
-              topWheelSim.setVelocity(0.8);
+              topWheel.set(ShooterConstants.kTopLauncherMotorSpeed);
+              topWheelSim.setVelocity(ShooterConstants.kTopLauncherMotorSpeed);
             })
         .andThen(
             () -> {
-              bottomWheel.set(-0.8);
-              bottomWheelSim.setVelocity(-0.8);
+              bottomWheel.set(ShooterConstants.kBottomLauncherMotorSpeed);
+              bottomWheelSim.setVelocity(ShooterConstants.kBottomLauncherMotorSpeed);
             })
         .finallyDo(
             () -> {
