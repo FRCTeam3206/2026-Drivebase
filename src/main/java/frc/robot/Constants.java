@@ -113,5 +113,8 @@ public final class Constants {
     public static final int kBottomIntakeMotor = 31;
     public static final int kTopIntakeMotor = 32;
     public static final int kDeployIntakeMotor = 39;
+    public static final double kTopIntakeMotorSpeed = 0.8; //Placeholder
+    public static final double kBottomIntakeMotorSpeed = 0.8; //Placeholder
+    public static final double kDeployIntakeMotorSpeed = 0.8; //Placeholder
   }
 }

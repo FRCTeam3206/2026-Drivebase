@@ -20,10 +20,10 @@ public class IntakeSubsystem extends SubsystemBase {
   public Command intakeBalls() {
     return this.run(
         () -> {
-          m_TopIntakeMotor.set(0.8);
-          m_BottomIntakeMotor.set(0.8);
-          TopIntakeMotorSim.setVelocity(0.8);
-          BottomIntakeMotorSim.setVelocity(0.8);
+          m_TopIntakeMotor.set(IntakeConstants.kTopIntakeMotorSpeed);
+          m_BottomIntakeMotor.set(IntakeConstants.kTopIntakeMotorSpeed);
+          TopIntakeMotorSim.setVelocity(IntakeConstants.kBottomIntakeMotorSpeed);
+          BottomIntakeMotorSim.setVelocity(IntakeConstants.kBottomIntakeMotorSpeed);
         });
   }
 
@@ -38,16 +38,18 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public Command deployIntake() {
-    return this.run(() -> {m_DeployIntake.set(0.8); 
-      DeployIntakeSim.setVelocity(0.8); })
+    return this.run(() -> {m_DeployIntake.set(IntakeConstants.kDeployIntakeMotorSpeed); 
+      DeployIntakeSim.setVelocity(IntakeConstants.kDeployIntakeMotorSpeed); })
         .withTimeout(0.2)
         .finallyDo(() -> {m_DeployIntake.set(0);
-        DeployIntakeSim.setVelocity(0);});
+          DeployIntakeSim.setVelocity(0);});
   }
 
   public Command returnIntake() {
-    return this.run(() -> m_DeployIntake.set(-0.8))
+    return this.run(() -> {m_DeployIntake.set(-IntakeConstants.kDeployIntakeMotorSpeed); 
+      DeployIntakeSim.setVelocity(-IntakeConstants.kDeployIntakeMotorSpeed);})
         .withTimeout(0.2)
-        .finallyDo(() -> m_DeployIntake.set(0));
+        .finallyDo(() -> {m_DeployIntake.set(0); 
+          DeployIntakeSim.setVelocity(0);});
   }
 }
