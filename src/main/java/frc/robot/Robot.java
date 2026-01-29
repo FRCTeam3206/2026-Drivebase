@@ -181,10 +181,10 @@ public class Robot extends TimedRobot {
   }
 
     public Command ballsAlignShootCommand() {
-      return this.run(() -> robotDrive.getToGoalCommand(new Pose2d(0, 0, Rotation2d.fromDegrees(0)))
+      return robotDrive.getToGoalCommand(new Pose2d(0, 0, Rotation2d.fromDegrees(0)))
       .andThen(robotDrive.getToGoalCommand(new Pose2d(7.75, 2.2, Rotation2d.fromDegrees(90))))
       .andThen(robotDrive.getToGoalCommand(new Pose2d(7.75, 7, Rotation2d.fromDegrees(0))))
-      .finallyDo((robotDrive.getToGoalCommand(new Pose2d(2, 4, Rotation2d.fromDegrees(0))))));
+      .andThen(robotDrive.getToGoalCommand(new Pose2d(2, 4, Rotation2d.fromDegrees(0))));
     }
 
   public void autons() {
