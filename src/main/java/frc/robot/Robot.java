@@ -180,6 +180,13 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
   }
 
+    public Command ballsAlignShootCommand() {
+      return this.run(() -> robotDrive.getToGoalCommand(new Pose2d(0, 0, Rotation2d.fromDegrees(0)))
+      .andThen(robotDrive.getToGoalCommand(new Pose2d(7.75, 2.2, Rotation2d.fromDegrees(90))))
+      .andThen(robotDrive.getToGoalCommand(new Pose2d(7.75, 7, Rotation2d.fromDegrees(0))))
+      .finallyDo((robotDrive.getToGoalCommand(new Pose2d(2, 4, Rotation2d.fromDegrees(0))))));
+    }
+
   public void autons() {
     m_autonChooser.addOption(
         "example", robotDrive.getToGoalCommand(new Pose2d(0, 0, Rotation2d.fromDegrees(0))));
@@ -188,6 +195,15 @@ public class Robot extends TimedRobot {
     m_autonChooser.addOption(
         "red_trench",
         robotDrive.getToGoalCommand(new Pose2d(467.64, 292.31, Rotation2d.fromDegrees(180))));
+    m_autonChooser.addOption(
+      "hub_align",
+      robotDrive.getToGoalCommand(new Pose2d(2, 4, Rotation2d.fromDegrees(0))));
+    m_autonChooser.addOption(
+      "climb_ladder",
+      robotDrive.getToGoalCommand(new Pose2d(1.5, 3.75, Rotation2d.fromDegrees(180))));
+    m_autonChooser.addOption(
+      "ballAlignShoot",
+      ballsAlignShootCommand());
 
     SmartDashboard.putData("Auton Chooser", m_autonChooser);
   }
